@@ -89,7 +89,7 @@ export const assignResource = async (req: Request, res: Response) => {
                     rate,
                     rateType: rateType || 'HOURLY',
                     assignedDays: req.body.assignedDays !== undefined ? req.body.assignedDays : existingAssignment.assignedDays,
-                    startDate: startDate ? new Date(startDate) : existingAssignment.startDate
+                    startDate: startDate ? new Date(startDate) : (existingAssignment as any).startDate
                 } as any
             });
             console.log('Assignment updated successfully');
@@ -221,30 +221,15 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Month and Year are required' });
         }
 
-        const targetMonth = parseInt(month as string);
+        const targetMonth = parseInt(month as string) - 1; // Convert to 0-indexed month
         const targetYear = parseInt(year as string);
 
         // Calculate total days in month
         const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
-        let totalWorkingDays = 0;
-        const workingDaysArray = [];
-
-        for (let i = 1; i <= daysInMonth; i++) {
-            const date = new Date(targetYear, targetMonth, i);
-            const dayOfWeek = date.getDay();
-            // 0 = Sunday, 6 = Saturday. Assume Mon-Fri are working days.
-            if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-                totalWorkingDays++;
-                workingDaysArray.push(i);
-            }
-        }
-
-        // Get leaves for this user in this month
-        // Get leaves for this user in this month
-        // Leave model is per-day entries
         const startDate = new Date(targetYear, targetMonth, 1);
         const endDate = new Date(targetYear, targetMonth + 1, 0);
 
+        // Get leaves for this user in this month
         const leaves = await prisma.leave.findMany({
             where: {
                 userId: id,
@@ -255,32 +240,107 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
             }
         });
 
-        // Calculate leave days (count business days that are leaves)
-        let leaveDaysCount = 0;
-        for (const leave of leaves) {
-            const d = new Date(leave.date);
-            const day = d.getDay();
-            if (d.getMonth() === targetMonth && day !== 0 && day !== 6) {
-                leaveDaysCount++;
+        // Calculate daily breakdown
+        const dailyBreakdown = [];
+        let cumulativeWorkingDays = 0;
+        let totalWorkingDays = 0;
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const date = new Date(targetYear, targetMonth, i);
+            const dayOfWeek = date.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+            // Check if leave
+            const isLeave = leaves.some(l => {
+                const leaveDate = new Date(l.date);
+                return leaveDate.getDate() === i && leaveDate.getMonth() === targetMonth && leaveDate.getFullYear() === targetYear;
+            });
+
+            let status = 'WORKING';
+            if (isWeekend) status = 'WEEKEND';
+            if (isLeave) status = 'LEAVE';
+
+            if (status === 'WORKING') {
+                cumulativeWorkingDays++;
             }
+            if (!isWeekend) {
+                totalWorkingDays++;
+            }
+
+            dailyBreakdown.push({
+                day: i,
+                date: date.toISOString().split('T')[0],
+                status,
+                cumulative: cumulativeWorkingDays
+            });
         }
 
-        const actualWorkingDays = totalWorkingDays - leaveDaysCount;
+        // Calculate stats from breakdown
+        const leaveDaysCount = dailyBreakdown.filter(d => d.status === 'LEAVE').length;
+        const actualWorkingDays = cumulativeWorkingDays;
 
-        // Get total assigned days from all projects
+        // --- Annual Stats Calculation ---
+        const startOfYear = new Date(targetYear, 0, 1);
+        const endOfCalc = new Date(); // Up to today for exhausted calculation
+        // If viewing past year, end at Dec 31
+        if (targetYear < new Date().getFullYear()) {
+            endOfCalc.setFullYear(targetYear, 11, 31);
+        }
+
+        // Get total assigned days from all projects (Allocated Annually)
+        // Note: usage of 'assignedDays' as 'Annual Budget' is an assumption based on user context "Annually allocated project days"
         const assignments = await prisma.projectResource.findMany({
             where: { userId: id }
         });
-        const totalAssignedDays = assignments.reduce((acc, curr) => acc + (curr.assignedDays || 0), 0);
+        const totalAnnualAssigned = assignments.reduce((acc, curr) => acc + (curr.assignedDays || 0), 0);
+
+        // Calculate exhausted days for the whole year (Business days - Leaves)
+        // We need all leaves for the year
+        const allYearLeaves = await prisma.leave.findMany({
+            where: {
+                userId: id,
+                date: {
+                    gte: startOfYear,
+                    lte: new Date(targetYear, 11, 31)
+                }
+            }
+        });
+
+        let annualExhausted = 0;
+        const currentDayOfYear = Math.floor((endOfCalc.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+
+        // Loop through every day of year up to 'now' to count working days
+        // Optimization: rough calc or detailed loop. Detailed loop is safer.
+        for (let d = new Date(targetYear, 0, 1); d <= endOfCalc; d.setDate(d.getDate() + 1)) {
+            const day = d.getDay();
+            if (day !== 0 && day !== 6) {
+                // Check leave
+                const isLeave = allYearLeaves.some(l => {
+                    const ld = new Date(l.date);
+                    return ld.getDate() === d.getDate() && ld.getMonth() === d.getMonth();
+                });
+                if (!isLeave) {
+                    annualExhausted++;
+                }
+            }
+        }
 
         res.json({
             month: targetMonth,
             year: targetYear,
-            totalBusinessDays: totalWorkingDays,
-            leaveDays: leaveDaysCount,
-            actualWorkingDays: actualWorkingDays,
-            totalAssignedDays: totalAssignedDays,
-            workingRatio: (actualWorkingDays / totalWorkingDays) * 100
+            monthlyStats: {
+                totalDays: daysInMonth,
+                businessDays: totalWorkingDays,
+                workedDays: actualWorkingDays,
+                leaveDays: leaveDaysCount,
+            },
+            annualStats: {
+                year: targetYear,
+                allocated: totalAnnualAssigned,
+                exhausted: annualExhausted,
+                remained: totalAnnualAssigned - annualExhausted
+            },
+            dailyBreakdown
         });
 
     } catch (error: any) {

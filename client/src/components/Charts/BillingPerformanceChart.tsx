@@ -1,24 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { billing } from '../../services/api';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const BillingPerformanceChart: React.FC = () => {
     const [projects, setProjects] = useState<any[]>([]);
     const [selectedProject, setSelectedProject] = useState('ALL');
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [month, setMonth] = useState(new Date().getMonth());
     const [year, setYear] = useState(new Date().getFullYear());
-    const [grandTotal, setGrandTotal] = useState(0);
+    const [totalAnnual, setTotalAnnual] = useState(0);
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
 
     useEffect(() => {
         fetchData();
-        fetchProjects();
-    }, [month, year, selectedProject]);
+    }, [year, selectedProject]);
 
     const fetchProjects = async () => {
         try {
-            const res = await billing.getOverview(month, year);
+            // Fetch for current month just to get logic list? Or we need a proper project list endpoint.
+            // Re-using overview endpoint for list is fine.
+            const res = await billing.getOverview();
             setProjects(res.data.projects);
         } catch (error) {
             console.error('Error fetching projects list:', error);
@@ -28,18 +32,10 @@ const BillingPerformanceChart: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            if (selectedProject === 'ALL') {
-                const res = await billing.getOverview(month, year);
-                setData(res.data.projects);
-                setGrandTotal(res.data.grandTotal);
-            } else {
-                const res = await billing.getProjectStats(selectedProject, month, year);
-                setData(res.data.resources.map((r: any) => ({
-                    code: r.resourceName, // Reuse 'code' key for XAxis
-                    cost: r.cost
-                })));
-                setGrandTotal(res.data.totalCost);
-            }
+            const res = await billing.getAnnualReport(year, selectedProject);
+            setData(res.data.data);
+            const total = res.data.data.reduce((acc: number, curr: any) => acc + curr.cost, 0);
+            setTotalAnnual(total);
         } catch (error) {
             console.error('Error fetching billing stats:', error);
         } finally {
@@ -50,15 +46,15 @@ const BillingPerformanceChart: React.FC = () => {
     if (loading) return <div>Loading billing stats...</div>;
 
     return (
-        <div style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', marginTop: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', marginTop: '2rem', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>
-                        {selectedProject === 'ALL' ? 'Billing Performance Overview' : 'Project Resource Breakdown'}
+                        {selectedProject === 'ALL' ? 'Annual Billing Performance (All Projects)' : 'Project Annual Trend'}
                     </h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>Total Projected Billing: <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>${grandTotal.toLocaleString()}</span></p>
+                    <p style={{ color: 'var(--text-secondary)' }}>Total Annual Billing: <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>${totalAnnual.toLocaleString()}</span></p>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <select
                         value={selectedProject}
                         onChange={(e) => setSelectedProject(e.target.value)}
@@ -67,15 +63,6 @@ const BillingPerformanceChart: React.FC = () => {
                         <option value="ALL">All Projects</option>
                         {projects.map((p: any) => (
                             <option key={p.id} value={p.id}>{p.name}</option>
-                        ))}
-                    </select>
-                    <select
-                        value={month}
-                        onChange={(e) => setMonth(parseInt(e.target.value))}
-                        style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
-                    >
-                        {Array.from({ length: 12 }, (_, i) => (
-                            <option key={i} value={i}>{new Date(0, i).toLocaleString('default', { month: 'short' })}</option>
                         ))}
                     </select>
                     <select
@@ -89,16 +76,19 @@ const BillingPerformanceChart: React.FC = () => {
                 </div>
             </div>
 
-            <div style={{ width: '100%', height: 350 }}>
+            <div style={{ width: '100%', height: 400 }}>
                 <ResponsiveContainer>
-                    <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="code" />
-                        <YAxis />
-                        <Tooltip formatter={(value) => `$${Number(value).toLocaleString()}`} />
+                    <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
+                        <XAxis dataKey="monthName" axisLine={false} tickLine={false} />
+                        <YAxis axisLine={false} tickLine={false} tickFormatter={(value) => `$${value}`} />
+                        <Tooltip
+                            formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Cost']}
+                            contentStyle={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}
+                        />
                         <Legend />
-                        <Bar dataKey="cost" fill="#8884d8" name="Projected Cost" />
-                    </BarChart>
+                        <Line type="monotone" dataKey="cost" stroke="var(--primary-color)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Billing Amount" />
+                    </LineChart>
                 </ResponsiveContainer>
             </div>
         </div>

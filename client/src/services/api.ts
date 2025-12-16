@@ -62,6 +62,8 @@ export const billing = {
         api.get(`/billing/stats/project/${id}`, { params: { month, year } }),
     getOverview: (month?: number, year?: number) =>
         api.get('/billing/stats/overview', { params: { month, year } }),
+    getAnnualReport: (year: number, projectId?: string) =>
+        api.get('/billing/stats/annual', { params: { year, projectId } }),
 };
 
 export default api;

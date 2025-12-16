@@ -13,7 +13,7 @@ const ResourceAnalyticsModal: React.FC<ResourceAnalyticsModalProps> = ({ isOpen,
     if (!resource) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Analytics: ${resource.name}`}>
+        <Modal isOpen={isOpen} onClose={onClose} title={`Analytics: ${resource.name}`} maxWidth="900px">
             <ResourceWorkingDaysChart resourceId={resource.id} />
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
                 <Button onClick={onClose}>Close</Button>

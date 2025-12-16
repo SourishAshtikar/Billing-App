@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 import ReactDOM from 'react-dom';
 
@@ -7,9 +7,10 @@ interface ModalProps {
     onClose: () => void;
     title: string;
     children: React.ReactNode;
+    maxWidth?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = '500px' }) => {
     if (!isOpen) return null;
 
     return ReactDOM.createPortal(
@@ -29,7 +30,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
                 backgroundColor: 'var(--card-bg)',
                 borderRadius: 'var(--radius-lg)',
                 width: '100%',
-                maxWidth: '500px',
+                maxWidth: maxWidth,
                 maxHeight: '90vh',
                 overflowY: 'auto',
                 boxShadow: 'var(--shadow-lg)',

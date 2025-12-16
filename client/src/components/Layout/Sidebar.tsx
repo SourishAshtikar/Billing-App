@@ -35,7 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
         }}>
             <div style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--accent-color)' }}></div>
-                BillFlow
+                HCLTech
             </div>
 
             <nav style={{ flex: 1 }}>

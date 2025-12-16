@@ -99,7 +99,7 @@ const ManageResourcesModal: React.FC<ManageResourcesModalProps> = ({ isOpen, onC
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
                                     title="Assignment Start Date"
-                                    style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
+                                    style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', width: '130px' }}
                                 />
                                 <input
                                     type="number"
