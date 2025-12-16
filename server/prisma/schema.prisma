@@ -1,0 +1,83 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String            @id @default(uuid())
+  email       String            @unique
+  password    String
+  name        String
+  role        Role              @default(RESOURCE)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  empId       String?           @unique
+  joiningDate DateTime?
+  leaves      Leave[]
+  resources   ProjectResource[]
+}
+
+model Project {
+  id             String            @id @default(uuid())
+  code           String            @unique
+  name           String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime?
+  status         String            @default("ACTIVE")
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  billingReports BillingReport[]
+  resources      ProjectResource[]
+}
+
+enum RateType {
+  HOURLY
+  DAILY
+}
+
+model ProjectResource {
+  id         String   @id @default(uuid())
+  projectId  String
+  userId     String
+  rate       Decimal  @db.Decimal(10, 2)
+  rateType   RateType @default(HOURLY)
+  assignedDays Int?   @default(0)
+  startDate    DateTime? @default(now())
+  assignedAt   DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+}
+
+model Leave {
+  id        String   @id @default(uuid())
+  userId    String
+  date      DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+}
+
+model BillingReport {
+  id          String   @id @default(uuid())
+  projectId   String
+  month       Int
+  year        Int
+  totalAmount Decimal  @db.Decimal(10, 2)
+  generatedAt DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  RESOURCE
+}

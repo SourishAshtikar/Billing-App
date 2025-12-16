@@ -1,1 +1,1 @@
-# Billing-App
+# billing-app
