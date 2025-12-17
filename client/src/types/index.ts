@@ -5,4 +5,7 @@ export interface Project {
     description?: string;
     startDate: string;
     status: 'ACTIVE' | 'COMPLETED';
+    _count?: {
+        resources: number;
+    };
 }

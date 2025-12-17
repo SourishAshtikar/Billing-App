@@ -3,6 +3,7 @@ import React from 'react';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
     size?: 'sm' | 'md' | 'lg';
+    isLoading?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -10,6 +11,8 @@ const Button: React.FC<ButtonProps> = ({
     variant = 'primary',
     size = 'md',
     style,
+    isLoading = false,
+    disabled,
     ...props
 }) => {
 
@@ -54,11 +57,22 @@ const Button: React.FC<ButtonProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.5rem',
+                opacity: (disabled || isLoading) ? 0.7 : 1,
+                cursor: (disabled || isLoading) ? 'not-allowed' : 'pointer',
                 ...style
             }}
+            disabled={disabled || isLoading}
             {...props}
         >
-            {children}
+            {isLoading ? (
+                <>
+                    <span style={{ width: '1em', height: '1em', border: '2px solid currentColor', borderRightColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }}></span>
+                    Loading...
+                </>
+            ) : children}
+            <style>{`
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            `}</style>
         </button>
     );
 };

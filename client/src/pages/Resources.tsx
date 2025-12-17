@@ -4,6 +4,7 @@ import { resources } from '../services/api';
 import ResourceEditModal from '../components/Resources/ResourceEditModal';
 import CSVUploadModal from '../components/Resources/CSVUploadModal';
 import ResourceAnalyticsModal from '../components/Resources/ResourceAnalyticsModal';
+import Card from '../components/UI/Card';
 
 interface Resource {
     id: string;
@@ -12,6 +13,9 @@ interface Resource {
     email: string;
     joiningDate: string;
     role: string;
+    allocatedDays?: number;
+    leavesTaken?: number;
+    availableWorkingDays?: string | number;
 }
 
 const Resources: React.FC = () => {
@@ -127,76 +131,73 @@ const Resources: React.FC = () => {
                 </div>
             </div>
 
-            {/* List */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                {resourceList.map((resource) => (
-                    <div key={resource.id}
-                        onClick={() => handleAnalyticsClick(resource)}
-                        style={{
-                            backgroundColor: 'var(--card-bg)',
-                            padding: '1.5rem',
-                            borderRadius: 'var(--radius-lg)',
-                            border: '1px solid var(--border-color)',
-                            boxShadow: 'var(--shadow-sm)',
-                            position: 'relative',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s, box-shadow 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'none';
-                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-                        }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <div style={{
-                                    width: '40px', height: '40px', borderRadius: '50%',
-                                    backgroundColor: 'var(--primary-light)', color: 'var(--primary-color)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                }}>
-                                    <User size={20} />
-                                </div>
-                                <div>
-                                    <h3 style={{ fontWeight: '600' }}>{resource.name}</h3>
-                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{resource.role}</p>
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleAnalyticsClick(resource); }}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary-color)' }}
-                                    title="Analytics"
-                                >
-                                    <BarChart2 size={18} />
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleEditClick(resource); }}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
-                                    title="Edit"
-                                >
-                                    <Edit size={18} />
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleDeleteClick(resource.id, resource.name); }}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger-color, #ef4444)' }}
-                                    title="Delete"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <p><strong>Email:</strong> {resource.email}</p>
-                            {resource.empId && <p><strong>Emp ID:</strong> {resource.empId}</p>}
-                            {resource.joiningDate && <p><strong>Joined:</strong> {new Date(resource.joiningDate).toLocaleDateString()}</p>}
-                        </div>
-                    </div>
-                ))}
-            </div>
+            {/* List Table */}
+            <Card className="overflow-hidden">
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: '#f8fafc' }}>
+                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem' }}>Name</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem' }}>Allocated Days (Project)</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem' }}>Leaves Taken (YTD)</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem' }}>Available Working Days</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem', textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {resourceList.map((resource) => (
+                                <tr key={resource.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background-color 0.2s' }}>
+                                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <div style={{
+                                                width: '32px', height: '32px', borderRadius: '50%',
+                                                backgroundColor: 'var(--primary-light)', color: 'var(--primary-color)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}>
+                                                <User size={16} />
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 500 }}>{resource.name}</div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{resource.email}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{resource.allocatedDays || 0}</td>
+                                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{resource.leavesTaken || 0}</td>
+                                    <td style={{ padding: '1rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--primary-color)' }}>
+                                        {resource.availableWorkingDays || 0}
+                                    </td>
+                                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                            <button
+                                                onClick={() => handleAnalyticsClick(resource)}
+                                                style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--primary-color)' }}
+                                                title="Analytics"
+                                            >
+                                                <BarChart2 size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleEditClick(resource)}
+                                                style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                                                title="Edit"
+                                            >
+                                                <Edit size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteClick(resource.id, resource.name)}
+                                                style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--danger-color)' }}
+                                                title="Delete"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
 
             {/* Add Modal */}
             {isAddModalOpen && (

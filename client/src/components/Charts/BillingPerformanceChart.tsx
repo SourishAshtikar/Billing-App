@@ -9,6 +9,21 @@ const BillingPerformanceChart: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [year, setYear] = useState(new Date().getFullYear());
     const [totalAnnual, setTotalAnnual] = useState(0);
+    const [totalExpected, setTotalExpected] = useState(0);
+    const [currencySymbol, setCurrencySymbol] = useState('$');
+
+    // Helper to get symbol from code (simple map or just use code)
+    const getSymbol = (curr: string) => {
+        switch (curr) {
+            case 'USD': return '$';
+            case 'EUR': return '€';
+            case 'GBP': return '£';
+            case 'INR': return '₹';
+            case 'AUD': return 'A$';
+            case 'CAD': return 'C$';
+            default: return curr || '$';
+        }
+    };
 
     useEffect(() => {
         fetchProjects();
@@ -35,7 +50,20 @@ const BillingPerformanceChart: React.FC = () => {
             const res = await billing.getAnnualReport(year, selectedProject);
             setData(res.data.data);
             const total = res.data.data.reduce((acc: number, curr: any) => acc + curr.cost, 0);
+            const expected = res.data.data.reduce((acc: number, curr: any) => acc + (curr.expectedCost || 0), 0);
             setTotalAnnual(total);
+            setTotalExpected(expected);
+
+            if (selectedProject !== 'ALL') {
+                const proj = projects.find(p => p.id === selectedProject);
+                if (proj && proj.currency) {
+                    setCurrencySymbol(getSymbol(proj.currency));
+                } else {
+                    setCurrencySymbol('$');
+                }
+            } else {
+                setCurrencySymbol('$'); // Default for aggregate
+            }
         } catch (error) {
             console.error('Error fetching billing stats:', error);
         } finally {
@@ -52,7 +80,11 @@ const BillingPerformanceChart: React.FC = () => {
                     <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>
                         {selectedProject === 'ALL' ? 'Annual Billing Performance (All Projects)' : 'Project Annual Trend'}
                     </h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>Total Annual Billing: <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>${totalAnnual.toLocaleString()}</span></p>
+                    <p style={{ color: 'var(--text-secondary)' }}>
+                        Total Actual: <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>{currencySymbol}{totalAnnual.toLocaleString()}</span>
+                        {' | '}
+                        Total Expected: <span style={{ color: '#82ca9d', fontWeight: 'bold' }}>{currencySymbol}{totalExpected.toLocaleString()}</span>
+                    </p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <select
@@ -81,13 +113,14 @@ const BillingPerformanceChart: React.FC = () => {
                     <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
                         <XAxis dataKey="monthName" axisLine={false} tickLine={false} />
-                        <YAxis axisLine={false} tickLine={false} tickFormatter={(value) => `$${value}`} />
+                        <YAxis axisLine={false} tickLine={false} tickFormatter={(value) => `${currencySymbol}${value}`} />
                         <Tooltip
-                            formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Cost']}
+                            formatter={(value, name) => [`${currencySymbol}${Number(value).toLocaleString()}`, name]}
                             contentStyle={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}
                         />
                         <Legend />
-                        <Line type="monotone" dataKey="cost" stroke="var(--primary-color)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Billing Amount" />
+                        <Line type="monotone" dataKey="cost" stroke="#166534" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Actual" />
+                        <Line type="monotone" dataKey="expectedCost" stroke="#1e3a8a" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Expected" />
                     </LineChart>
                 </ResponsiveContainer>
             </div>

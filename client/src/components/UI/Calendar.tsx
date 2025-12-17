@@ -1,33 +1,50 @@
 import React, { useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isWeekend } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, isWeekend } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CalendarProps {
     leaves: string[]; // Array of date strings 'YYYY-MM-DD'
     onToggleLeave: (date: string) => void;
+    currentDate?: Date;
+    onMonthChange?: (offset: number) => void;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ leaves, onToggleLeave }) => {
-    const [currentMonth, setCurrentMonth] = useState(new Date());
+const Calendar: React.FC<CalendarProps> = ({ leaves, onToggleLeave, currentDate, onMonthChange }) => {
+    const [internalMonth, setInternalMonth] = useState(new Date());
+
+    const activeMonth = currentDate || internalMonth;
 
     const daysInMonth = eachDayOfInterval({
-        start: startOfMonth(currentMonth),
-        end: endOfMonth(currentMonth),
+        start: startOfMonth(activeMonth),
+        end: endOfMonth(activeMonth),
     });
 
-    const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-    const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+    const handlePrevMonth = () => {
+        if (onMonthChange) {
+            onMonthChange(-1);
+        } else {
+            setInternalMonth(subMonths(internalMonth, 1));
+        }
+    };
+
+    const handleNextMonth = () => {
+        if (onMonthChange) {
+            onMonthChange(1);
+        } else {
+            setInternalMonth(addMonths(internalMonth, 1));
+        }
+    };
 
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     // Calculate empty cells for start of month
-    const startDay = startOfMonth(currentMonth).getDay();
+    const startDay = startOfMonth(activeMonth).getDay();
     const emptyCells = Array(startDay).fill(null);
 
     return (
         <div style={{ backgroundColor: 'white', borderRadius: 'var(--radius-lg)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{format(currentMonth, 'MMMM yyyy')}</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{format(activeMonth, 'MMMM yyyy')}</h2>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button onClick={handlePrevMonth} style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'transparent' }}><ChevronLeft size={20} /></button>
                     <button onClick={handleNextMonth} style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'transparent' }}><ChevronRight size={20} /></button>

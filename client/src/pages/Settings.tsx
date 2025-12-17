@@ -1,100 +1,100 @@
 import React, { useState } from 'react';
-import { auth } from '../services/api';
 import Card from '../components/UI/Card';
 import Button from '../components/UI/Button';
+import { Lock } from 'lucide-react';
+import { auth } from '../services/api';
 
 const Settings: React.FC = () => {
-    const [formData, setFormData] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmNewPassword: ''
-    });
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(null);
 
-        if (formData.newPassword !== formData.confirmNewPassword) {
+        if (newPassword !== confirmPassword) {
             setMessage({ type: 'error', text: 'New passwords do not match' });
             return;
         }
 
-        if (formData.newPassword.length < 6) {
+        if (newPassword.length < 6) {
             setMessage({ type: 'error', text: 'Password must be at least 6 characters' });
             return;
         }
 
+        setLoading(true);
         try {
-            await auth.changePassword({
-                currentPassword: formData.currentPassword,
-                newPassword: formData.newPassword
-            });
+            await auth.changePassword(currentPassword, newPassword);
             setMessage({ type: 'success', text: 'Password updated successfully' });
-            setFormData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
         } catch (error: any) {
-            setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to update password' });
+            setMessage({ type: 'error', text: error.response?.data?.message || 'Error updating password' });
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>Settings</h1>
+        <div className="max-w-2xl mx-auto">
+            <h1 className="text-2xl font-bold mb-6">Settings</h1>
+            <Card title="Security">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="flex items-center gap-2 mb-4 text-gray-700">
+                        <Lock size={20} />
+                        <h3 className="font-semibold">Change Password</h3>
+                    </div>
 
-            <div style={{ maxWidth: '600px' }}>
-                <Card title="Change Password">
                     {message && (
-                        <div style={{
-                            padding: '1rem',
-                            borderRadius: 'var(--radius-md)',
-                            marginBottom: '1rem',
-                            backgroundColor: message.type === 'success' ? '#dcfce7' : '#fee2e2',
-                            color: message.type === 'success' ? '#166534' : '#b91c1c'
-                        }}>
+                        <div className={`p-3 rounded text-sm ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                             {message.text}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Current Password</label>
-                            <input
-                                type="password"
-                                required
-                                value={formData.currentPassword}
-                                onChange={e => setFormData({ ...formData, currentPassword: e.target.value })}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                        <input
+                            type="password"
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                        />
+                    </div>
 
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>New Password</label>
-                            <input
-                                type="password"
-                                required
-                                value={formData.newPassword}
-                                onChange={e => setFormData({ ...formData, newPassword: e.target.value })}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                        <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                        />
+                    </div>
 
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Confirm New Password</label>
-                            <input
-                                type="password"
-                                required
-                                value={formData.confirmNewPassword}
-                                onChange={e => setFormData({ ...formData, confirmNewPassword: e.target.value })}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            required
+                        />
+                    </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                            <Button type="submit">Update Password</Button>
-                        </div>
-                    </form>
-                </Card>
-            </div>
+                    <div className="pt-2">
+                        <Button type="submit" isLoading={loading}>
+                            Update Password
+                        </Button>
+                    </div>
+                </form>
+            </Card>
         </div>
     );
 };

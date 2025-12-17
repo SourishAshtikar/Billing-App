@@ -1,12 +1,11 @@
 import React from 'react';
 
-interface CardProps {
-    children: React.ReactNode;
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     title?: string;
-    className?: string;
+    children: React.ReactNode;
 }
 
-const Card: React.FC<CardProps> = ({ children, title, className = '' }) => {
+const Card: React.FC<CardProps> = ({ children, title, className = '', style, ...props }) => {
     return (
         <div style={{
             backgroundColor: 'var(--card-bg)',
@@ -14,8 +13,8 @@ const Card: React.FC<CardProps> = ({ children, title, className = '' }) => {
             boxShadow: 'var(--shadow-md)',
             padding: '1.5rem',
             border: '1px solid var(--border-color)',
-            ...styles
-        }} className={className}>
+            ...style
+        }} className={className} {...props}>
             {title && (
                 <h3 style={{
                     marginBottom: '1rem',

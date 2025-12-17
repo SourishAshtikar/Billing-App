@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../UI/Modal';
 import Button from '../UI/Button';
-import { projects } from '../../services/api';
+import { projects as projectApi } from '../../services/api';
 
 interface ProjectEditModalProps {
     isOpen: boolean;
@@ -12,128 +12,130 @@ interface ProjectEditModalProps {
 
 const ProjectEditModal: React.FC<ProjectEditModalProps> = ({ isOpen, onClose, project, onSuccess }) => {
     const [formData, setFormData] = useState({
-        name: '',
         code: '',
+        name: '',
         description: '',
+        po: '',
+        lineItem: '',
         startDate: '',
-        endDate: '',
         status: 'ACTIVE'
     });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
 
     useEffect(() => {
         if (project) {
             setFormData({
-                name: project.name || '',
-                code: project.code || '',
+                code: project.code,
+                name: project.name,
                 description: project.description || '',
+                po: project.po || '',
+                lineItem: project.lineItem || '',
                 startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : '',
-                endDate: project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : '',
-                status: project.status || 'ACTIVE'
+                status: project.status
             });
         }
     }, [project]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
-
         try {
-            await projects.update(project.id, formData);
+            await projectApi.update(project.id, formData);
             onSuccess();
             onClose();
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to update project');
+        } catch (error) {
+            console.error('Failed to update project', error);
+            alert('Failed to update project');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Edit Project">
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {error && <div style={{ color: 'red', fontSize: '0.9rem' }}>{error}</div>}
+        <Modal isOpen={isOpen} onClose={onClose} title={`Edit Project: ${project?.code}`}>
+            <form onSubmit={handleSubmit}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Project Code</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.code}
+                            onChange={e => setFormData({ ...formData, code: e.target.value })}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
+                        />
+                    </div>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Status</label>
+                        <select
+                            value={formData.status}
+                            onChange={e => setFormData({ ...formData, status: e.target.value })}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
+                        >
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                            <option value="COMPLETED">Completed</option>
+                        </select>
+                    </div>
+                </div>
 
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Project Name</label>
+                <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Project Name</label>
                     <input
                         type="text"
-                        name="name"
+                        required
                         value={formData.name}
-                        onChange={handleChange}
-                        required
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
                         style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
-                    />
-                </div>
-
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Project Code</label>
-                    <input
-                        type="text"
-                        name="code"
-                        value={formData.code}
-                        onChange={handleChange}
-                        required
-                        style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
-                    />
-                </div>
-
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Description</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', minHeight: '80px' }}
                     />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Start Date</label>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Purchase Order (PO)</label>
                         <input
-                            type="date"
-                            name="startDate"
-                            value={formData.startDate}
-                            onChange={handleChange}
-                            required
+                            type="text"
+                            placeholder="e.g. PO-2024-001"
+                            value={formData.po}
+                            onChange={e => setFormData({ ...formData, po: e.target.value })}
                             style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
                         />
                     </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>End Date</label>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Line Item</label>
                         <input
-                            type="date"
-                            name="endDate"
-                            value={formData.endDate}
-                            onChange={handleChange}
+                            type="text"
+                            placeholder="e.g. 10"
+                            value={formData.lineItem}
+                            onChange={e => setFormData({ ...formData, lineItem: e.target.value })}
                             style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
                         />
                     </div>
                 </div>
 
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Status</label>
-                    <select
-                        name="status"
-                        value={formData.status}
-                        onChange={handleChange}
+                <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Description</label>
+                    <textarea
+                        rows={3}
+                        value={formData.description}
+                        onChange={e => setFormData({ ...formData, description: e.target.value })}
+                        style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontFamily: 'inherit' }}
+                    />
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Start Date</label>
+                    <input
+                        type="date"
+                        required
+                        value={formData.startDate}
+                        onChange={e => setFormData({ ...formData, startDate: e.target.value })}
                         style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
-                    >
-                        <option value="ACTIVE">Active</option>
-                        <option value="INACTIVE">Inactive</option>
-                        <option value="COMPLETED">Completed</option>
-                    </select>
+                    />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-                    <Button onClick={onClose} type="button">Cancel</Button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+                    <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
                     <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Changes'}</Button>
                 </div>
             </form>

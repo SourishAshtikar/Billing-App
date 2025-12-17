@@ -17,6 +17,7 @@ const ManageResourcesModal: React.FC<ManageResourcesModalProps> = ({ isOpen, onC
     const [selectedResourceId, setSelectedResourceId] = useState('');
     const [rateType, setRateType] = useState('HOURLY');
     const [rate, setRate] = useState(50);
+    const [currency, setCurrency] = useState('USD');
     const [assignedDays, setAssignedDays] = useState(0);
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [loading, setLoading] = useState(false);
@@ -53,7 +54,8 @@ const ManageResourcesModal: React.FC<ManageResourcesModalProps> = ({ isOpen, onC
                 rate,
                 rateType,
                 assignedDays,
-                startDate
+                startDate,
+                currency
             });
             // Refresh list
             fetchData();
@@ -108,6 +110,18 @@ const ManageResourcesModal: React.FC<ManageResourcesModalProps> = ({ isOpen, onC
                                     placeholder="Rate"
                                     style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', width: '80px' }}
                                 />
+                                <select
+                                    value={currency}
+                                    onChange={(e) => setCurrency(e.target.value)}
+                                    style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', width: '80px' }}
+                                >
+                                    <option value="USD">USD</option>
+                                    <option value="INR">INR</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="AUD">AUD</option>
+                                    <option value="CAD">CAD</option>
+                                </select>
                                 <input
                                     type="number"
                                     value={assignedDays}
@@ -144,7 +158,7 @@ const ManageResourcesModal: React.FC<ManageResourcesModalProps> = ({ isOpen, onC
                                         <span>{ar.user?.name || 'Unknown User'}</span>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                             <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                                ${ar.rate}/{ar.rateType === 'DAILY' ? 'day' : 'hr'} • {ar.assignedDays || 0} days • {ar.startDate ? new Date(ar.startDate).toLocaleDateString() : 'N/A'}
+                                                {ar.currency || '$'} {ar.rate}/{ar.rateType === 'DAILY' ? 'day' : 'hr'} • {ar.assignedDays || 0} days • {ar.startDate ? new Date(ar.startDate).toLocaleDateString() : 'N/A'}
                                             </span>
                                             <button
                                                 onClick={() => handleRemoveResource(ar.userId)}

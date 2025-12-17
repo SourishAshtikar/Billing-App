@@ -26,6 +26,8 @@ model Project {
   code           String            @unique
   name           String
   description    String?
+  po             String?
+  lineItem       String?
   startDate      DateTime
   endDate        DateTime?
   status         String            @default("ACTIVE")
@@ -45,6 +47,7 @@ model ProjectResource {
   projectId  String
   userId     String
   rate       Decimal  @db.Decimal(10, 2)
+  currency   String   @default("USD")
   rateType   RateType @default(HOURLY)
   assignedDays Int?   @default(0)
   startDate    DateTime? @default(now())
@@ -60,6 +63,7 @@ model Leave {
   userId    String
   date      DateTime
   reason    String?
+  isHalfDay Boolean  @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 

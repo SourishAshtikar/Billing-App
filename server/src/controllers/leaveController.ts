@@ -4,7 +4,7 @@ import prisma from '../db';
 // Apply for leave (or mark leave)
 export const applyLeave = async (req: Request, res: Response) => {
     try {
-        const { date, reason } = req.body;
+        const { date, reason, isHalfDay } = req.body;
         // @ts-ignore
         const userId = req.user.id;
 
@@ -18,7 +18,9 @@ export const applyLeave = async (req: Request, res: Response) => {
         });
 
         if (existingLeave) {
-            // Toggle off if exists (delete) - behaving as toggle for now as per frontend req
+            // If it exists, currently we toggle off (delete).
+            // NOTE: If complex update logic is needed (e.g. changing full to half), we might need more logic.
+            // For now, retaining toggle behavior.
             await prisma.leave.delete({
                 where: { id: existingLeave.id }
             });
@@ -29,7 +31,8 @@ export const applyLeave = async (req: Request, res: Response) => {
             data: {
                 userId,
                 date: new Date(date),
-                reason
+                reason,
+                isHalfDay: isHalfDay || false
             }
         });
 

@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../components/UI/Card';
-import { useAuth } from '../context/AuthContext.tsx';
-import { projects as projectApi } from '../services/api.ts';
-import { Folder, Users, DollarSign, Activity } from 'lucide-react';
+import { projects as projectApi, resources as resourceApi } from '../services/api.ts';
+import { Folder, Users } from 'lucide-react';
 import BillingPerformanceChart from '../components/Charts/BillingPerformanceChart';
 
 const AdminDashboard: React.FC = () => {
-    const { user } = useAuth();
+    // const { user } = useAuth(); // Unused
     const [stats, setStats] = useState({
         totalProjects: 0,
         activeProjects: 0,
@@ -18,10 +17,11 @@ const AdminDashboard: React.FC = () => {
         const fetchStats = async () => {
             try {
                 const { data: projects } = await projectApi.getAll();
+                const { data: resources } = await resourceApi.getAll();
                 setStats({
                     totalProjects: projects.length,
                     activeProjects: projects.filter((p: any) => p.status === 'ACTIVE').length,
-                    totalResources: 15 // Placeholder until we have resources count API
+                    totalResources: resources.length
                 });
             } catch (error) {
                 console.error(error);
@@ -65,9 +65,7 @@ const AdminDashboard: React.FC = () => {
                 </Link>
             </div>
 
-            <Card title="Quick Actions">
-                <p>Use the sidebar to manage projects, assign resources, or view billing reports.</p>
-            </Card>
+
 
             <BillingPerformanceChart />
         </div>

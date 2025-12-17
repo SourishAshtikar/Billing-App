@@ -24,7 +24,7 @@ export const getProjects = async (req: Request, res: Response) => {
 // Create a new project
 export const createProject = async (req: Request, res: Response) => {
     try {
-        const { code, name, description, startDate, endDate, status } = req.body;
+        const { code, name, description, startDate, endDate, status, po, lineItem } = req.body;
 
         const existingProject = await prisma.project.findUnique({
             where: { code }
@@ -41,7 +41,9 @@ export const createProject = async (req: Request, res: Response) => {
                 description,
                 startDate: new Date(startDate),
                 endDate: endDate ? new Date(endDate) : null,
-                status: status || 'ACTIVE'
+                status: status || 'ACTIVE',
+                po,
+                lineItem
             }
         });
 
@@ -79,7 +81,7 @@ export const getProjectById = async (req: Request, res: Response) => {
 export const updateProject = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { code, name, description, startDate, endDate, status } = req.body;
+        const { code, name, description, startDate, endDate, status, po, lineItem } = req.body;
 
         const project = await prisma.project.update({
             where: { id },
@@ -89,7 +91,9 @@ export const updateProject = async (req: Request, res: Response) => {
                 description,
                 startDate: startDate ? new Date(startDate) : undefined,
                 endDate: endDate ? new Date(endDate) : null,
-                status // ACTIVE/INACTIVE
+                status, // ACTIVE/INACTIVE
+                po,
+                lineItem
             }
         });
 

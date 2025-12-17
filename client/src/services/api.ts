@@ -15,8 +15,8 @@ export const auth = {
     login: (credentials: any) => api.post('/auth/login', credentials),
     register: (data: any) => api.post('/auth/register', data),
     logout: () => api.post('/auth/logout'),
+    changePassword: (currentPassword: string, newPassword: string) => api.put('/auth/update-password', { currentPassword, newPassword }),
     getMe: () => api.get('/auth/me'),
-    changePassword: (data: any) => api.put('/auth/update-password', data),
 };
 
 // Projects
@@ -58,12 +58,14 @@ export const leaves = {
 
 // Billing
 export const billing = {
-    getProjectStats: (id: string, month?: number, year?: number) =>
-        api.get(`/billing/stats/project/${id}`, { params: { month, year } }),
+    getProjectStats: (id: string, month?: number, year?: number, period?: 'MONTH' | 'YTD') =>
+        api.get(`/billing/stats/project/${id}`, { params: { month, year, period } }),
     getOverview: (month?: number, year?: number) =>
         api.get('/billing/stats/overview', { params: { month, year } }),
     getAnnualReport: (year: number, projectId?: string) =>
         api.get('/billing/stats/annual', { params: { year, projectId } }),
+    getResourceStats: (month?: number, year?: number) =>
+        api.get('/billing/my-stats', { params: { month, year } }),
 };
 
 export default api;

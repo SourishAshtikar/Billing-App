@@ -61,9 +61,6 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                         <NavLink to="/reports" style={linkStyle}>
                             <CreditCard size={20} /> Billing & Reports
                         </NavLink>
-                        <NavLink to="/settings" style={linkStyle}>
-                            <Settings size={20} /> Settings
-                        </NavLink>
                     </>
                 )}
 
@@ -74,6 +71,12 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                         </NavLink>
                     </>
                 )}
+
+                <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.5rem' }}>
+                    <NavLink to="/settings" style={linkStyle}>
+                        <Settings size={20} /> Settings
+                    </NavLink>
+                </div>
             </nav>
 
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>

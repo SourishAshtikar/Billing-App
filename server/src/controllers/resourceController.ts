@@ -61,7 +61,7 @@ export const createResource = async (req: Request, res: Response) => {
 export const assignResource = async (req: Request, res: Response) => {
     try {
         console.log('assignResource request body:', req.body);
-        const { projectId, userId, rate, rateType, startDate } = req.body;
+        const { projectId, userId, rate, rateType, startDate, currency } = req.body;
         console.log('DEBUG: startDate received:', startDate, 'Type:', typeof startDate);
         if (startDate) console.log('DEBUG: Parsed Date:', new Date(startDate));
 
@@ -88,6 +88,7 @@ export const assignResource = async (req: Request, res: Response) => {
                 data: {
                     rate,
                     rateType: rateType || 'HOURLY',
+                    currency: currency || 'USD',
                     assignedDays: req.body.assignedDays !== undefined ? req.body.assignedDays : existingAssignment.assignedDays,
                     startDate: startDate ? new Date(startDate) : (existingAssignment as any).startDate
                 } as any
@@ -103,6 +104,7 @@ export const assignResource = async (req: Request, res: Response) => {
                 userId,
                 rate,
                 rateType: rateType || 'HOURLY',
+                currency: currency || 'USD',
                 assignedDays: req.body.assignedDays || 0,
                 startDate: startDate ? new Date(startDate) : new Date()
             } as any
@@ -349,19 +351,66 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
     }
 };
 
-// Get all resources (Users with RESOURCE role)
+// Get all resources with stats
 export const getResources = async (req: Request, res: Response) => {
     try {
         const resources = await prisma.user.findMany({
             where: { role: 'RESOURCE' },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true
+            include: {
+                resources: true, // Project Assignments
+                leaves: true     // All leaves
             }
         });
-        res.json(resources);
+
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        const endOfYear = new Date(now.getFullYear(), 11, 31);
+
+        // Helper to calc business days between two dates
+        const getBusinessDays = (start: Date, end: Date) => {
+            let count = 0;
+            let cur = new Date(start);
+            while (cur <= end) {
+                const day = cur.getDay();
+                if (day !== 0 && day !== 6) count++;
+                cur.setDate(cur.getDate() + 1);
+            }
+            return count;
+        };
+
+        const totalBusinessDaysThisYear = getBusinessDays(startOfYear, endOfYear);
+
+        const resourcesWithStats = resources.map(r => {
+            // Allocated Days
+            const allocatedDays = r.resources.reduce((acc, curr) => acc + (curr.assignedDays || 0), 0);
+
+            // Leaves Taken (Till Date)
+            const leaves = r.leaves.filter(l => new Date(l.date) <= now && new Date(l.date) >= startOfYear);
+            const leavesCount = leaves.reduce((acc, l) => acc + (l.isHalfDay ? 0.5 : 1), 0);
+
+            // Available Working Days (Total Business Days - Leaves Taken)
+            // Or maybe "Remaining Business Days in Year"? 
+            // "Available working days" usually means capacity. 
+            // Let's interpret as: "Total Potential Working Days (Year) - Leaves Taken" 
+            // OR "Allocated - Billed"?
+            // Reading user request: "Number of days allocated to project, Number of leaves taken till date, Available working days"
+            // "Available Working Days" likely means "Total Business Days (YTD or Year) - Leaves".
+            // Let's provide "Total Business Days (Year) - Leaves Taken" as 'availableWorkingDays'.
+
+            const availableWorkingDays = totalBusinessDaysThisYear - leavesCount;
+
+            return {
+                id: r.id,
+                name: r.name,
+                email: r.email,
+                role: r.role,
+                allocatedDays,
+                leavesTaken: leavesCount,
+                availableWorkingDays: availableWorkingDays.toFixed(1)
+            };
+        });
+
+        res.json(resourcesWithStats);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching resources', error });
     }

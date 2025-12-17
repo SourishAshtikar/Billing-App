@@ -106,7 +106,7 @@ const ResourceEditModal: React.FC<ResourceEditModalProps> = ({ isOpen, onClose, 
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-                    <Button variant="outline" onClick={onClose} type="button">Cancel</Button>
+                    <Button variant="secondary" onClick={onClose} type="button">Cancel</Button>
                     <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Changes'}</Button>
                 </div>
             </form>
