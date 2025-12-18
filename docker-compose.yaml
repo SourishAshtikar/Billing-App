@@ -1,25 +1,35 @@
 services:
+  # 1. The Database
   db:
-    image: postgres:17
+    image: postgres:17-alpine
     restart: always
     environment:
-      POSTGRES_PASSWORD: billing_app_password
-      POSTGRES_DB: myapp_db
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
+  # 2. The API Server
   server:
-    build: ./server
+    image: sourishashtikar/billing_app_server:latest
+    restart: always
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: postgres://postgres:billing_app_password@db:5432/myapp_db
+      # We pass the DB credentials to the Node.js app
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     depends_on:
       - db
 
+  # 3. The Frontend Client
   client:
-    build: ./client
+    image: sourishashtikar/billing_app_client:latest
+    restart: always
     ports:
       - "80:80"
     depends_on:
       - server
+
+volumes:
+  postgres_data:
