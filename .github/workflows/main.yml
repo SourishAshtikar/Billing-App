@@ -33,7 +33,7 @@ jobs:
           context: ./server
           file: ./server/DockerFile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/billing_app_server:test
+          tags: ${{ secrets.DOCKER_USERNAME }}/billing_app_server:latest
 
       - name: Build Client Image
         uses: docker/build-push-action@v5
@@ -41,4 +41,4 @@ jobs:
           context: ./client
           file: ./client/DockerFile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/billing_app_client:test
+          tags: ${{ secrets.DOCKER_USERNAME }}/billing_app_client:latest
