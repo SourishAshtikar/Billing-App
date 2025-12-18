@@ -17,11 +17,21 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Debug Folder Structure
+        run: |
+          echo "Listing root:"
+          ls -F
+          echo "Listing server folder:"
+          ls -F server/
+          echo "Listing client folder:"
+          ls -F client/
 
       - name: Build Server Image
         uses: docker/build-push-action@v5
         with:
           context: ./server
+          file: ./server/DockerFile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/billing_app_server:test
 
@@ -29,5 +39,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./client
+          file: ./client/DockerFile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/billing_app_client:test
