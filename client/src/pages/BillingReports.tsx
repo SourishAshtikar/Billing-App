@@ -12,6 +12,7 @@ const BillingReports: React.FC = () => {
     const [projects, setProjects] = useState<any[]>([]);
     const [selectedProject, setSelectedProject] = useState('ALL');
     const [selectedMonth, setSelectedMonth] = useState<number | 'ALL'>(new Date().getMonth());
+    const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
     const [loading, setLoading] = useState(false);
 
     // Filters
@@ -48,7 +49,7 @@ const BillingReports: React.FC = () => {
                 const { data } = await billingApi.getProjectStats(
                     selectedProject,
                     monthToSend,
-                    now.getFullYear(),
+                    selectedYear,
                     period
                 );
 
@@ -68,7 +69,7 @@ const BillingReports: React.FC = () => {
         };
 
         fetchReport();
-    }, [selectedProject, selectedMonth]);
+    }, [selectedProject, selectedMonth, selectedYear]);
 
     // Client-side Filter Effect
     useEffect(() => {
@@ -82,9 +83,9 @@ const BillingReports: React.FC = () => {
     const handleExportPDF = () => {
         const doc = new jsPDF();
         const projectName = selectedProject === 'ALL' ? 'All Projects' : projects.find(p => p.id === selectedProject)?.name || 'Project';
-        const periodText = selectedMonth === 'ALL' ? 'YTD' : new Date(2024, selectedMonth as number).toLocaleString('default', { month: 'long' });
+        const periodText = selectedMonth === 'ALL' ? 'YTD' : new Date(selectedYear, selectedMonth as number).toLocaleString('default', { month: 'long' });
         // Include Year in the title
-        const year = new Date().getFullYear();
+        const year = selectedYear;
         const titleText = selectedMonth === 'ALL' ? `YTD Report - ${year}` : `${periodText} ${year}`;
 
         doc.setFontSize(18);
@@ -93,7 +94,7 @@ const BillingReports: React.FC = () => {
         doc.setFontSize(11);
         doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
 
-        const tableColumn = ["Sr.No", "Resource Name", "Project", "PO", "Line Item", "Expected", "Leaves", "Actual Days", "Billing Amount"];
+        const tableColumn = ["Sr.No", "Resource Name", "Project", "PO", "Line Item", "Expected", "Leaves", "Actual", "Cumulative", "Rate", "Billing Amount"];
         const tableRows: any[] = [];
 
         filteredReports.forEach((item, index) => {
@@ -107,6 +108,8 @@ const BillingReports: React.FC = () => {
                 item.expectedWorkingDays || 0,
                 item.leavesTaken || 0,
                 item.actualWorkingDays || 0,
+                item.cumulativeWorkingDays || 0,
+                `${symbol}${item.rate}`,
                 `${symbol}${Number(item.cost).toLocaleString()}`
             ];
             tableRows.push(row);
@@ -124,6 +127,8 @@ const BillingReports: React.FC = () => {
             totalExpected,
             totalLeaves,
             totalActual,
+            "-",
+            "-",
             `${symbol}${totalCost.toLocaleString()}`
         ]);
 
@@ -131,7 +136,7 @@ const BillingReports: React.FC = () => {
             head: [tableColumn],
             body: tableRows,
             startY: 40,
-            styles: { fontSize: 8 },
+            styles: { fontSize: 7 },
             headStyles: { fillColor: [79, 70, 229] }
         });
 
@@ -142,6 +147,9 @@ const BillingReports: React.FC = () => {
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
+
+    const currentYear = new Date().getFullYear();
+    const years = [currentYear - 1, currentYear, currentYear + 1];
 
     return (
         <div>
@@ -157,6 +165,15 @@ const BillingReports: React.FC = () => {
                             <option value="ALL">All Months (YTD)</option>
                             {months.map((m, idx) => (
                                 <option key={idx} value={idx}>{m}</option>
+                            ))}
+                        </select>
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                            style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontWeight: 500 }}
+                        >
+                            {years.map(y => (
+                                <option key={y} value={y}>{y}</option>
                             ))}
                         </select>
                         <select
@@ -213,7 +230,7 @@ const BillingReports: React.FC = () => {
                     </div>
 
                     {/* Right Content: Table */}
-                    <Card title={`Billing Details (${selectedMonth === 'ALL' ? 'YTD ' + new Date().getFullYear() : months[selectedMonth as number] + ' ' + new Date().getFullYear()})`}>
+                    <Card title={`Billing Details (${selectedMonth === 'ALL' ? 'YTD ' + selectedYear : months[selectedMonth as number] + ' ' + selectedYear})`}>
                         {loading ? <p>Loading report...</p> : (
                             <div style={{ overflowX: 'auto' }}>
                                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>

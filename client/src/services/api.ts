@@ -54,6 +54,15 @@ export const resources = {
 export const leaves = {
     apply: (data: any) => api.post('/leaves', data),
     getMyLeaves: () => api.get('/leaves/my'),
+    bulkImport: (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return api.post('/leaves/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    },
 };
 
 // Billing

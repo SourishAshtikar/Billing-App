@@ -116,27 +116,22 @@ const Projects: React.FC = () => {
                                     </span>
                                 )}
                             </div>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>{project.name}</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{project.name}</h3>
+                                <button
+                                    onClick={() => handleEditClick(project)}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}
+                                    title="Edit"
+                                >
+                                    <Edit size={16} />
+                                </button>
+                            </div>
                             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
                                 {project.description}
                             </p>
 
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <Button size="sm" onClick={() => openResourceModal(project)}>Manage Resources</Button>
-                                <button
-                                    onClick={() => handleEditClick(project)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
-                                    title="Edit"
-                                >
-                                    <Edit size={18} />
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteClick(project.id, project.name)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger-color, #ef4444)' }}
-                                    title="Delete"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
                             </div>
                         </Card>
                     ))}

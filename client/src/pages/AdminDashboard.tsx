@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../components/UI/Card';
-import { projects as projectApi, resources as resourceApi } from '../services/api.ts';
+import { projects as projectApi, resources as resourceApi, leaves as leavesApi } from '../services/api.ts';
 import { Folder, Users } from 'lucide-react';
 import BillingPerformanceChart from '../components/Charts/BillingPerformanceChart';
 
@@ -63,6 +63,38 @@ const AdminDashboard: React.FC = () => {
                         </div>
                     </Card>
                 </Link>
+
+                <Card>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ padding: '0.75rem', backgroundColor: '#dcfce7', borderRadius: '50%', color: '#15803d' }}>
+                            <Users size={24} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Upload Leaves (CSV)</p>
+                            <input
+                                type="file"
+                                accept=".csv"
+                                onChange={async (e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        try {
+                                            await leavesApi.bulkImport(e.target.files[0]);
+                                            alert('Leaves uploaded successfully');
+                                            e.target.value = ''; // Reset
+                                        } catch (error) {
+                                            console.error(error);
+                                            alert('Failed to upload leaves');
+                                        }
+                                    }
+                                }}
+                                style={{
+                                    fontSize: '0.875rem',
+                                    padding: '0.25rem 0',
+                                    width: '100%'
+                                }}
+                            />
+                        </div>
+                    </div>
+                </Card>
             </div>
 
 

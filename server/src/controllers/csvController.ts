@@ -90,3 +90,107 @@ export const bulkImportResources = async (req: Request, res: Response) => {
         });
     });
 };
+
+export const bulkImportLeaves = async (req: Request, res: Response) => {
+    if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const results: any[] = [];
+    const errors: any[] = [];
+    let successCount = 0;
+
+    const stream = fs.createReadStream(req.file.path)
+        .pipe(parse({ columns: true, trim: true }));
+
+    stream.on('data', (row) => {
+        results.push(row);
+    });
+
+    stream.on('error', (error) => {
+        console.error('CSV Parse Error:', error);
+        res.status(500).json({ message: 'Error parsing CSV file' });
+    });
+
+    stream.on('end', async () => {
+        // Expected columns: empId, date, reason, isHalfDay
+        for (const [index, row] of results.entries()) {
+            const { empId, date, reason, isHalfDay } = row;
+
+            if (!empId || !date) {
+                errors.push({ row: index + 1, message: 'Missing required fields: empId, date' });
+                continue;
+            }
+
+            try {
+                // Find user by empId
+                const user = await prisma.user.findUnique({
+                    where: { empId }
+                });
+
+                if (!user) {
+                    errors.push({ row: index + 1, message: `User not found: ${empId}` });
+                    continue;
+                }
+
+                const leaveDate = new Date(date);
+                if (isNaN(leaveDate.getTime())) {
+                    errors.push({ row: index + 1, message: `Invalid date format: ${date}` });
+                    continue;
+                }
+
+                // Check for existing leave
+                const existingLeave = await prisma.leave.findUnique({
+                    where: {
+                        userId_date: {
+                            userId: user.id,
+                            date: leaveDate
+                        }
+                    }
+                });
+
+                if (existingLeave) {
+                    // Update existing leave ?? Or skip?
+                    // Let's update it for now or skip if exactly same.
+                    // Implementation plan said: "Create Leave entries".
+                    // Let's overwrite/update to be safe for corrections.
+                    await prisma.leave.update({
+                        where: { id: existingLeave.id },
+                        data: {
+                            reason: reason || existingLeave.reason,
+                            isHalfDay: isHalfDay === 'true' || isHalfDay === true
+                        }
+                    });
+                    successCount++;
+                    // Technically an update, but counting as success.
+                } else {
+                    await prisma.leave.create({
+                        data: {
+                            userId: user.id,
+                            date: leaveDate,
+                            reason: reason || 'Bulk Import',
+                            isHalfDay: isHalfDay === 'true' || isHalfDay === true
+                        }
+                    });
+                    successCount++;
+                }
+
+            } catch (error: any) {
+                errors.push({ row: index + 1, message: error.message || 'Database error' });
+            }
+        }
+
+        // Cleanup
+        fs.unlinkSync(req.file!.path);
+
+        res.json({
+            message: 'Bulk leave import completed',
+            summary: {
+                total: results.length,
+                success: successCount,
+                failed: errors.length,
+                errors: errors
+            }
+        });
+    });
+};

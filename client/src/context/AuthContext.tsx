@@ -5,6 +5,8 @@ interface User {
     id: string;
     name: string;
     email: string;
+    empId?: string;
+    joiningDate?: string;
     role: 'ADMIN' | 'MANAGER' | 'RESOURCE';
 }
 

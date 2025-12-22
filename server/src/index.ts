@@ -14,7 +14,13 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://192.168.0.102:5173', // Local Network
+        'http://100.125.171.118:5173', // Tailscale Access
+        process.env.CLIENT_URL
+    ].filter(Boolean) as string[],
     credentials: true
 }));
 app.use(express.json());
