@@ -1,35 +1,45 @@
 services:
-  # 1. The Database
-  db:
-    image: postgres:17-alpine
-    restart: always
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  # 2. The API Server
+  # 1. The API Server
   server:
-    image: sourishashtikar/billing_app_server:latest
+    build:
+      context: ./server
+      dockerfile: DockerFile
     restart: always
     ports:
       - "5000:5000"
     environment:
-      # We pass the DB credentials to the Node.js app
-      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-    depends_on:
-      - db
+      DB_HOST: host.docker.internal
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_DIALECT: postgres
+      NODE_ENV: development
+      JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - billing-network
 
-  # 3. The Frontend Client
+  # 2. The Frontend Client
   client:
-    image: sourishashtikar/billing_app_client:latest
+    build:
+      context: ./client
+      dockerfile: DockerFile
     restart: always
     ports:
-      - "80:80"
+      - "3000:5173"
+    environment:
+      VITE_API_URL: http://localhost:5000
+    volumes:
+      - ./client:/app
+      - /app/node_modules
     depends_on:
       - server
+    networks:
+      - billing-network
 
-volumes:
-  postgres_data:
+networks:
+  billing-network:
+    driver: bridge

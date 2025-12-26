@@ -1,7 +1,21 @@
 FROM node:20-alpine
-WORKDIR /usr/src/app
+
+WORKDIR /app
+
+# Copy package files
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
+
+# Copy source code
 COPY . .
+
+# Expose port 5000
 EXPOSE 5000
-CMD node create_db.js && node index.js
+
+# Set environment to development
+ENV NODE_ENV=development
+
+# Start the server
+CMD ["npm", "run", "dev"]
