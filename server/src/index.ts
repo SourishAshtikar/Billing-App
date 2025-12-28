@@ -42,6 +42,10 @@ app.use('/api/billing', billingRoutes);
 app.use('/api/users', userRoutes);
 
 
+app.get('/api/health', (req: Request, res: Response) => {
+    res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
 app.get('/', (req: Request, res: Response) => {
     res.send('Monthly Billing App API is running');
 });
