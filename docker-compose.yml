@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=billingappdb
       - POSTGRES_DB=billing_db
     ports:
       - "5432:5432"
@@ -24,10 +24,11 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/billing_db?schema=public
-      - JWT_SECRET=your_jwt_secret_here
+      - DATABASE_URL=postgresql://postgres:billingappdb@db:5432/billing_db?schema=public
+      - JWT_SECRET=f6702b7eedad2b0085b91dbc40e62f58
       - CLIENT_URL=http://localhost
       - PORT=3001
+      - NODE_ENV=production
     ports:
       - "3001:3001"
     depends_on:
@@ -41,8 +42,11 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - server
+    environment:
+      - VITE_API_URL=/api
 
 volumes:
   postgres_data:

@@ -3,7 +3,7 @@ import Card from '../components/UI/Card';
 import Button from '../components/UI/Button';
 import Modal from '../components/UI/Modal';
 import type { Project } from '../types';
-import { Plus, Folder, Edit, Trash2, Users } from 'lucide-react';
+import { Plus, Folder, Edit, Users } from 'lucide-react';
 import { projects as projectApi } from '../services/api.ts';
 
 import ManageResourcesModal from '../components/Projects/ManageResourcesModal';
@@ -64,16 +64,16 @@ const Projects: React.FC = () => {
         setShowEditModal(true);
     };
 
-    const handleDeleteClick = async (id: string, name: string) => {
-        if (window.confirm(`Are you sure you want to delete project ${name}? This action cannot be undone.`)) {
-            try {
-                await projectApi.delete(id);
-                fetchProjects();
-            } catch (error) {
-                alert('Failed to delete project');
-            }
-        }
-    };
+    // const handleDeleteClick = async (id: string, name: string) => {
+    //     if (window.confirm(`Are you sure you want to delete project ${name}? This action cannot be undone.`)) {
+    //         try {
+    //             await projectApi.delete(id);
+    //             fetchProjects();
+    //         } catch (error) {
+    //             alert('Failed to delete project');
+    //         }
+    //     }
+    // };
 
     return (
         <div>

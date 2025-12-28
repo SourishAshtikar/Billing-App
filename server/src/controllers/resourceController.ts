@@ -253,7 +253,7 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
             // Check if leave
-            const isLeave = leaves.some(l => {
+            const isLeave = leaves.some((l: any) => {
                 const leaveDate = new Date(l.date);
                 return leaveDate.getDate() === i && leaveDate.getMonth() === targetMonth && leaveDate.getFullYear() === targetYear;
             });
@@ -294,7 +294,7 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
         const assignments = await prisma.projectResource.findMany({
             where: { userId: id }
         });
-        const totalAnnualAssigned = assignments.reduce((acc, curr) => acc + (curr.assignedDays || 0), 0);
+        const totalAnnualAssigned = assignments.reduce((acc: number, curr: any) => acc + (curr.assignedDays || 0), 0);
 
         // Calculate exhausted days for the whole year (Business days - Leaves)
         // We need all leaves for the year
@@ -317,7 +317,7 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
             const day = d.getDay();
             if (day !== 0 && day !== 6) {
                 // Check leave
-                const isLeave = allYearLeaves.some(l => {
+                const isLeave = allYearLeaves.some((l: any) => {
                     const ld = new Date(l.date);
                     return ld.getDate() === d.getDate() && ld.getMonth() === d.getMonth();
                 });
@@ -380,13 +380,13 @@ export const getResources = async (req: Request, res: Response) => {
 
         const totalBusinessDaysThisYear = getBusinessDays(startOfYear, endOfYear);
 
-        const resourcesWithStats = resources.map(r => {
+        const resourcesWithStats = resources.map((r: any) => {
             // Allocated Days
-            const allocatedDays = r.resources.reduce((acc, curr) => acc + (curr.assignedDays || 0), 0);
+            const allocatedDays = r.resources.reduce((acc: number, curr: any) => acc + (curr.assignedDays || 0), 0);
 
             // Leaves Taken (Till Date)
-            const leaves = r.leaves.filter(l => new Date(l.date) <= now && new Date(l.date) >= startOfYear);
-            const leavesCount = leaves.reduce((acc, l) => acc + (l.isHalfDay ? 0.5 : 1), 0);
+            const leaves = r.leaves.filter((l: any) => new Date(l.date) <= now && new Date(l.date) >= startOfYear);
+            const leavesCount = leaves.reduce((acc: number, l: any) => acc + (l.isHalfDay ? 0.5 : 1), 0);
 
             // Available Working Days (Total Business Days - Leaves Taken)
             // Or maybe "Remaining Business Days in Year"? 

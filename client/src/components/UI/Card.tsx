@@ -30,8 +30,4 @@ const Card: React.FC<CardProps> = ({ children, title, className = '', style, ...
     );
 };
 
-const styles = {
-    // Basic inline styles fallback or extension
-};
-
 export default Card;

@@ -9,9 +9,9 @@ COPY prisma ./prisma/
 
 RUN npm install
 
-# Copy source and build
+# Copy source first to generate Prisma Client with code context
 COPY . .
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://user:pass@localhost:5432/db" npx prisma generate
 RUN npm run build
 
 # Production stage
@@ -27,15 +27,17 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
+# Create uploads directory and set permissions
+RUN mkdir -p /app/uploads && chmod 755 /app/uploads
+
 # Add a non-root user for security
-RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
+RUN addgroup -S nodejs && adduser -S nextjs -G nodejs && chown -R nextjs:nodejs /app
 USER nextjs
 
 EXPOSE 3001
 
-# Handle signals and run migrations
-# Note: In production, you might want to run 'prisma migrate deploy' instead of 'db push'
+# Wait for database and run server
 HEALTHCHECK --interval=30s --timeout=3s \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 
-CMD ["sh", "-c", "npx prisma db push && npm start"]
+CMD ["npm", "start"]
