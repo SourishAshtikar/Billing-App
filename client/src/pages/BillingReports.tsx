@@ -12,7 +12,7 @@ const BillingReports: React.FC = () => {
     const [projects, setProjects] = useState<any[]>([]);
     const [selectedProject, setSelectedProject] = useState('ALL');
     const [selectedMonth, setSelectedMonth] = useState<number | 'ALL'>(new Date().getMonth());
-    const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+    const [selectedYear, setSelectedYear] = useState<number>(2026);
     const [loading, setLoading] = useState(false);
 
     // Filters
@@ -148,8 +148,7 @@ const BillingReports: React.FC = () => {
         "July", "August", "September", "October", "November", "December"
     ];
 
-    const currentYear = new Date().getFullYear();
-    const years = [currentYear - 1, currentYear, currentYear + 1];
+    const years = [2026, 2027, 2028];
 
     return (
         <div>

@@ -63,7 +63,11 @@ export const leaves = {
             },
         });
     },
+    adminMark: (data: any) => api.post('/leaves/admin/mark', data),
+    delete: (id: string) => api.delete(`/leaves/${id}`),
+    getUserLeaves: (userId: string) => api.get(`/leaves/user/${userId}`),
 };
+
 
 // Billing
 export const billing = {
@@ -77,4 +81,11 @@ export const billing = {
         api.get('/billing/my-stats', { params: { month, year } }),
 };
 
+// Users
+export const users = {
+    getAll: () => api.get('/users'),
+    updateRole: (id: string, role: string) => api.put(`/users/${id}/role`, { role }),
+};
+
 export default api;
+

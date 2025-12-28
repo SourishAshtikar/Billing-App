@@ -7,7 +7,7 @@ const BillingPerformanceChart: React.FC = () => {
     const [selectedProject, setSelectedProject] = useState('ALL');
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [year, setYear] = useState(new Date().getFullYear());
+    const [year, setYear] = useState(2026);
     const [totalAnnual, setTotalAnnual] = useState(0);
     const [totalExpected, setTotalExpected] = useState(0);
     const [currencySymbol, setCurrencySymbol] = useState('$');
@@ -102,8 +102,8 @@ const BillingPerformanceChart: React.FC = () => {
                         onChange={(e) => setYear(parseInt(e.target.value))}
                         style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
                     >
-                        <option value={2024}>2024</option>
-                        <option value={2025}>2025</option>
+                        <option value={2026}>2026</option>
+                        <option value={2027}>2027</option>
                     </select>
                 </div>
             </div>

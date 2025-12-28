@@ -1,0 +1,7 @@
+empId,date,reason,isHalfDay,isMandatory
+ALL,2026-01-01,New Year,false,true
+ALL,2026-01-26,Republic Day,false,true
+ALL,2026-05-01,Independance Day,false,true
+ALL,2026-08-15,Independance Day,false,true
+ALL,2026-10-02,Independance Day,false,true
+ALL,2026-10-21,Independance Day,false,true

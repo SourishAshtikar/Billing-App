@@ -113,9 +113,9 @@ export const bulkImportLeaves = async (req: Request, res: Response) => {
     });
 
     stream.on('end', async () => {
-        // Expected columns: empId, date, reason, isHalfDay
+        // Expected columns: empId, date, reason, isHalfDay, isMandatory
         for (const [index, row] of results.entries()) {
-            const { empId, date, reason, isHalfDay } = row;
+            const { empId, date, reason, isHalfDay, isMandatory } = row;
 
             if (!empId || !date) {
                 errors.push({ row: index + 1, message: 'Missing required fields: empId, date' });
@@ -123,57 +123,65 @@ export const bulkImportLeaves = async (req: Request, res: Response) => {
             }
 
             try {
-                // Find user by empId
-                const user = await prisma.user.findUnique({
-                    where: { empId }
-                });
-
-                if (!user) {
-                    errors.push({ row: index + 1, message: `User not found: ${empId}` });
-                    continue;
-                }
-
                 const leaveDate = new Date(date);
                 if (isNaN(leaveDate.getTime())) {
                     errors.push({ row: index + 1, message: `Invalid date format: ${date}` });
                     continue;
                 }
 
-                // Check for existing leave
-                const existingLeave = await prisma.leave.findUnique({
-                    where: {
-                        userId_date: {
-                            userId: user.id,
-                            date: leaveDate
-                        }
-                    }
-                });
-
-                if (existingLeave) {
-                    // Update existing leave ?? Or skip?
-                    // Let's update it for now or skip if exactly same.
-                    // Implementation plan said: "Create Leave entries".
-                    // Let's overwrite/update to be safe for corrections.
-                    await prisma.leave.update({
-                        where: { id: existingLeave.id },
-                        data: {
-                            reason: reason || existingLeave.reason,
-                            isHalfDay: isHalfDay === 'true' || isHalfDay === true
-                        }
+                const usersToProcess = [];
+                if (empId.toUpperCase() === 'ALL') {
+                    const allResources = await prisma.user.findMany({
+                        where: { role: 'RESOURCE' }
                     });
-                    successCount++;
-                    // Technically an update, but counting as success.
+                    usersToProcess.push(...allResources);
                 } else {
-                    await prisma.leave.create({
-                        data: {
-                            userId: user.id,
-                            date: leaveDate,
-                            reason: reason || 'Bulk Import',
-                            isHalfDay: isHalfDay === 'true' || isHalfDay === true
+                    const user = await prisma.user.findUnique({
+                        where: { empId }
+                    });
+                    if (user) {
+                        usersToProcess.push(user);
+                    } else {
+                        errors.push({ row: index + 1, message: `User not found: ${empId}` });
+                        continue;
+                    }
+                }
+
+                for (const user of usersToProcess) {
+                    const mandVal = isMandatory === 'true' || isMandatory === true || isMandatory === '1';
+                    const halfVal = isHalfDay === 'true' || isHalfDay === true || isHalfDay === '1';
+
+                    const existingLeave = await prisma.leave.findUnique({
+                        where: {
+                            userId_date: {
+                                userId: user.id,
+                                date: leaveDate
+                            }
                         }
                     });
-                    successCount++;
+
+                    if (existingLeave) {
+                        await prisma.leave.update({
+                            where: { id: existingLeave.id },
+                            data: {
+                                reason: reason || existingLeave.reason,
+                                isHalfDay: halfVal,
+                                isMandatory: mandVal
+                            }
+                        });
+                    } else {
+                        await prisma.leave.create({
+                            data: {
+                                userId: user.id,
+                                date: leaveDate,
+                                reason: reason || 'Bulk Import',
+                                isHalfDay: halfVal,
+                                isMandatory: mandVal
+                            }
+                        });
+                    }
                 }
+                successCount++;
 
             } catch (error: any) {
                 errors.push({ row: index + 1, message: error.message || 'Database error' });

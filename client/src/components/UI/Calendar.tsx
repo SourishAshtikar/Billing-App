@@ -3,7 +3,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMo
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CalendarProps {
-    leaves: string[]; // Array of date strings 'YYYY-MM-DD'
+    leaves: { dateStr: string; isMandatory?: boolean }[];
     onToggleLeave: (date: string) => void;
     currentDate?: Date;
     onMonthChange?: (offset: number) => void;
@@ -13,7 +13,6 @@ const Calendar: React.FC<CalendarProps> = ({ leaves, onToggleLeave, currentDate,
     const [internalMonth, setInternalMonth] = useState(new Date());
 
     const activeMonth = currentDate || internalMonth;
-
     const daysInMonth = eachDayOfInterval({
         start: startOfMonth(activeMonth),
         end: endOfMonth(activeMonth),
@@ -62,20 +61,22 @@ const Calendar: React.FC<CalendarProps> = ({ leaves, onToggleLeave, currentDate,
 
                 {daysInMonth.map(date => {
                     const dateStr = format(date, 'yyyy-MM-dd');
-                    const isLeave = leaves.includes(dateStr);
+                    const leave = leaves.find(l => l.dateStr === dateStr);
+                    const isLeave = !!leave;
+                    const isMandatory = leave?.isMandatory;
                     const isWknd = isWeekend(date);
 
                     return (
                         <button
                             key={dateStr}
                             onClick={() => onToggleLeave(dateStr)}
-                            disabled={isWknd} // Optional: Disable weekends if they aren't working days
+                            disabled={isWknd}
                             style={{
                                 padding: '1rem 0',
                                 borderRadius: 'var(--radius-md)',
-                                border: 'none',
-                                backgroundColor: isLeave ? 'var(--danger-color)' : isWknd ? '#f1f5f9' : 'transparent',
-                                color: isLeave ? 'white' : isWknd ? '#94a3b8' : 'var(--text-main)',
+                                border: isMandatory ? '2px solid var(--danger-color)' : 'none',
+                                backgroundColor: isMandatory ? '#fdeaea' : (isLeave ? 'var(--danger-color)' : isWknd ? '#f1f5f9' : 'transparent'),
+                                color: (isLeave && !isMandatory) ? 'white' : isWknd ? '#94a3b8' : 'var(--text-main)',
                                 cursor: isWknd ? 'not-allowed' : 'pointer',
                                 fontWeight: isLeave ? 600 : 400,
                                 position: 'relative',
@@ -84,16 +85,28 @@ const Calendar: React.FC<CalendarProps> = ({ leaves, onToggleLeave, currentDate,
                         >
                             {format(date, 'd')}
                             {isLeave && (
-                                <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', fontSize: '0.625rem' }}>LEAVE</div>
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: 4,
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    fontSize: '0.55rem',
+                                    color: isMandatory ? 'var(--danger-color)' : 'inherit'
+                                }}>
+                                    {isMandatory ? 'MANDATORY' : 'LEAVE'}
+                                </div>
                             )}
                         </button>
                     );
                 })}
             </div>
 
-            <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            <div style={{ marginTop: '1.5rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: 12, height: 12, backgroundColor: 'var(--danger-color)', borderRadius: 2 }}></div> Unpaid Leave
+                    <div style={{ width: 12, height: 12, backgroundColor: 'var(--danger-color)', borderRadius: 2 }}></div> Leave
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ width: 12, height: 12, backgroundColor: '#fdeaea', border: '1px solid var(--danger-color)', borderRadius: 2 }}></div> Mandatory
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div style={{ width: 12, height: 12, backgroundColor: '#f1f5f9', borderRadius: 2 }}></div> Weekend
@@ -102,5 +115,6 @@ const Calendar: React.FC<CalendarProps> = ({ leaves, onToggleLeave, currentDate,
         </div>
     );
 };
+
 
 export default Calendar;

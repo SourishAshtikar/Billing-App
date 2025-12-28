@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -65,8 +64,10 @@ model Leave {
   date      DateTime
   reason    String?
   isHalfDay Boolean  @default(false)
+  isMandatory Boolean @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
+
 
   @@unique([userId, date])
 }

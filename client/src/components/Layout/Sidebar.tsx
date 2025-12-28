@@ -44,9 +44,9 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                     <Home size={20} /> Dashboard
                 </NavLink>
 
-                {role === 'RESOURCE' && (
+                {(role === 'RESOURCE' || role === 'ADMIN') && (
                     <NavLink to="/leaves" style={linkStyle}>
-                        <Calendar size={20} /> My Leaves
+                        <Calendar size={20} /> {role === 'ADMIN' ? 'Manage Leaves' : 'My Leaves'}
                     </NavLink>
                 )}
 

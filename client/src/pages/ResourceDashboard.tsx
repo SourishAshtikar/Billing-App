@@ -9,7 +9,7 @@ const ResourceDashboard: React.FC = () => {
     const [leaves, setLeaves] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const now = new Date();
+    const now = new Date(2026, 0, 1); // Defaulting to start of 2026 for display logic
 
     const fetchLeavesAndStats = async () => {
         try {
@@ -33,7 +33,7 @@ const ResourceDashboard: React.FC = () => {
     if (loading) return <p>Loading dashboard...</p>;
 
     // Local Stats Calculation (Matches Leaves.tsx logic)
-    const currentYear = now.getFullYear();
+    const currentYear = 2026;
     const currentMonthLeaves = leaves.filter(l => {
         const d = new Date(l.date);
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();

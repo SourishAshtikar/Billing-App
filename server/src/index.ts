@@ -7,6 +7,8 @@ import projectRoutes from './routes/projectRoutes';
 import resourceRoutes from './routes/resourceRoutes';
 import leaveRoutes from './routes/leaveRoutes';
 import billingRoutes from './routes/billingRoutes';
+import userRoutes from './routes/userRoutes';
+
 
 dotenv.config();
 
@@ -37,6 +39,8 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/leaves', leaveRoutes);
 app.use('/api/billing', billingRoutes);
+app.use('/api/users', userRoutes);
+
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Monthly Billing App API is running');
