@@ -48,6 +48,8 @@ export const resources = {
     },
     getWorkingDays: (id: string, month: number, year: number) =>
         api.get(`/resources/${id}/working-days`, { params: { month, year } }),
+    getAnnualBreakdown: (year: number) =>
+        api.get('/resources/annual-breakdown', { params: { year } }),
 };
 
 // Leaves

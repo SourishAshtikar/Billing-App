@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { assignResource, getResources, createResource, updateResource, deleteResource, getResourceWorkingDays } from '../controllers/resourceController';
+import { assignResource, getResources, createResource, updateResource, deleteResource, getResourceWorkingDays, getAnnualMonthlyBreakdown } from '../controllers/resourceController';
 import { bulkImportResources } from '../controllers/csvController';
 import { protect, admin } from '../middleware/authMiddleware';
 
@@ -21,6 +21,9 @@ router.get('/', protect, getResources);
 
 // GET /api/resources/:id/working-days - Get working days analytics
 router.get('/:id/working-days', protect, admin, getResourceWorkingDays);
+
+// GET /api/resources/annual-breakdown - Get annual breakdown for all resources
+router.get('/annual-breakdown', protect, admin, getAnnualMonthlyBreakdown);
 
 // PUT /api/resources/:id - Update resource (admin only)
 router.put('/:id', protect, admin, updateResource);

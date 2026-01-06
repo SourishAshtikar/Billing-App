@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, User, Edit, Trash2, Upload, BarChart2 } from 'lucide-react';
+import { Plus, Upload } from 'lucide-react';
 import { resources } from '../services/api';
 import ResourceEditModal from '../components/Resources/ResourceEditModal';
 import CSVUploadModal from '../components/Resources/CSVUploadModal';
 import ResourceAnalyticsModal from '../components/Resources/ResourceAnalyticsModal';
-import Card from '../components/UI/Card';
+import ResourceMonthlyTable from '../components/Resources/ResourceMonthlyTable';
+import ResourceActionsModal from '../components/Resources/ResourceActionsModal';
 
 interface Resource {
     id: string;
@@ -25,6 +26,8 @@ const Resources: React.FC = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
     const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
+    const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+
     const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
     const [formData, setFormData] = useState({
         empId: '',
@@ -66,6 +69,14 @@ const Resources: React.FC = () => {
         }
     };
 
+    const handleResourceClick = (resourceId: string) => {
+        const resource = resourceList.find(r => r.id === resourceId);
+        if (resource) {
+            setSelectedResource(resource);
+            setIsActionsModalOpen(true);
+        }
+    };
+
     const handleEditClick = (resource: Resource) => {
         setSelectedResource(resource);
         setIsEditModalOpen(true);
@@ -76,10 +87,10 @@ const Resources: React.FC = () => {
         setIsAnalyticsModalOpen(true);
     };
 
-    const handleDeleteClick = async (id: string, name: string) => {
-        if (window.confirm(`Are you sure you want to delete ${name}? This will remove all their project assignments and leave records.`)) {
+    const handleDeleteClick = async (resource: Resource) => {
+        if (window.confirm(`Are you sure you want to delete ${resource.name}? This will remove all their project assignments and leave records.`)) {
             try {
-                await resources.delete(id);
+                await resources.delete(resource.id);
                 fetchResources();
             } catch (err: any) {
                 alert(err.response?.data?.message || 'Failed to delete resource');
@@ -131,73 +142,8 @@ const Resources: React.FC = () => {
                 </div>
             </div>
 
-            {/* List Table */}
-            <Card className="overflow-hidden">
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: '#f8fafc' }}>
-                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem' }}>Name</th>
-                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem' }}>Allocated Days (Project)</th>
-                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem' }}>Leaves Taken (YTD)</th>
-                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem' }}>Available Working Days</th>
-                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem', textAlign: 'right' }}>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {resourceList.map((resource) => (
-                                <tr key={resource.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background-color 0.2s' }}>
-                                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                            <div style={{
-                                                width: '32px', height: '32px', borderRadius: '50%',
-                                                backgroundColor: 'var(--primary-light)', color: 'var(--primary-color)',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                            }}>
-                                                <User size={16} />
-                                            </div>
-                                            <div>
-                                                <div style={{ fontWeight: 500 }}>{resource.name}</div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{resource.email}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{resource.allocatedDays || 0}</td>
-                                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{resource.leavesTaken || 0}</td>
-                                    <td style={{ padding: '1rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--primary-color)' }}>
-                                        {resource.availableWorkingDays || 0}
-                                    </td>
-                                    <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                                            <button
-                                                onClick={() => handleAnalyticsClick(resource)}
-                                                style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--primary-color)' }}
-                                                title="Analytics"
-                                            >
-                                                <BarChart2 size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleEditClick(resource)}
-                                                style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)' }}
-                                                title="Edit"
-                                            >
-                                                <Edit size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteClick(resource.id, resource.name)}
-                                                style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--danger-color)' }}
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </Card>
+            {/* Monthly Breakdown Table */}
+            <ResourceMonthlyTable onResourceClick={handleResourceClick} />
 
             {/* Add Modal */}
             {isAddModalOpen && (
@@ -270,6 +216,16 @@ const Resources: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {/* Actions Modal (The new generic popup) */}
+            <ResourceActionsModal
+                isOpen={isActionsModalOpen}
+                onClose={() => setIsActionsModalOpen(false)}
+                resource={selectedResource}
+                onEdit={handleEditClick}
+                onDelete={handleDeleteClick}
+                onAnalytics={handleAnalyticsClick}
+            />
 
             {/* Edit Modal */}
             <ResourceEditModal

@@ -355,9 +355,25 @@ export const getAnnualBillingReport = async (req: Request, res: Response) => {
             });
         }
 
+        // Get PO Total and Currency if single project
+        let poTotal = 0;
+        let currency = 'USD';
+        if (targetProjectId && targetProjectId !== 'ALL') {
+            const p = await prisma.project.findUnique({
+                where: { id: targetProjectId },
+                select: { poTotal: true, currency: true }
+            });
+            if (p) {
+                if (p.poTotal) poTotal = Number(p.poTotal);
+                if (p.currency) currency = p.currency;
+            }
+        }
+
         res.json({
             year: targetYear,
             projectId: targetProjectId,
+            poTotal, // Return PO Total
+            currency,
             data: monthlyData
         });
 

@@ -16,6 +16,8 @@ const ProjectEditModal: React.FC<ProjectEditModalProps> = ({ isOpen, onClose, pr
         name: '',
         description: '',
         po: '',
+        poTotal: '',
+        currency: 'USD',
         lineItem: '',
         startDate: '',
         status: 'ACTIVE'
@@ -29,6 +31,8 @@ const ProjectEditModal: React.FC<ProjectEditModalProps> = ({ isOpen, onClose, pr
                 name: project.name,
                 description: project.description || '',
                 po: project.po || '',
+                poTotal: project.poTotal || '',
+                currency: project.currency || 'USD',
                 lineItem: project.lineItem || '',
                 startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : '',
                 status: project.status
@@ -90,7 +94,7 @@ const ProjectEditModal: React.FC<ProjectEditModalProps> = ({ isOpen, onClose, pr
                     />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                     <div style={{ marginBottom: '1rem' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Purchase Order (PO)</label>
                         <input
@@ -100,6 +104,31 @@ const ProjectEditModal: React.FC<ProjectEditModalProps> = ({ isOpen, onClose, pr
                             onChange={e => setFormData({ ...formData, po: e.target.value })}
                             style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
                         />
+                    </div>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>PO Total</label>
+                        <input
+                            type="number"
+                            placeholder="0.00"
+                            value={formData.poTotal}
+                            onChange={e => setFormData({ ...formData, poTotal: e.target.value })}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
+                        />
+                    </div>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Currency</label>
+                        <select
+                            value={formData.currency}
+                            onChange={e => setFormData({ ...formData, currency: e.target.value })}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}
+                        >
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="INR">INR (₹)</option>
+                            <option value="AUD">AUD (A$)</option>
+                            <option value="CAD">CAD (C$)</option>
+                        </select>
                     </div>
                     <div style={{ marginBottom: '1rem' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Line Item</label>

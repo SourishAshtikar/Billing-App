@@ -26,6 +26,8 @@ model Project {
   name           String
   description    String?
   po             String?
+  poTotal        Decimal?          @db.Decimal(15, 2)
+  currency       String            @default("USD")
   lineItem       String?
   startDate      DateTime
   endDate        DateTime?

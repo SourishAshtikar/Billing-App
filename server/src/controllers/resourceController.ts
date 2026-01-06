@@ -223,13 +223,19 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Month and Year are required' });
         }
 
-        const targetMonth = parseInt(month as string) - 1; // Convert to 0-indexed month
+        const targetMonth = parseInt(month as string); // 0-indexed month from frontend
         const targetYear = parseInt(year as string);
 
         // Calculate total days in month
         const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+        // Start date: 1st of the month at 00:00:00
         const startDate = new Date(targetYear, targetMonth, 1);
+
+        // End date: Last day of the month at 23:59:59.999
+        // This ensures match for any time on the last day
         const endDate = new Date(targetYear, targetMonth + 1, 0);
+        endDate.setHours(23, 59, 59, 999);
 
         // Get leaves for this user in this month
         const leaves = await prisma.leave.findMany({
@@ -252,19 +258,41 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
             const dayOfWeek = date.getDay();
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
+            // Robust Date Comparison
+            // Compare YYYY-MM-DD strings to ignore time/timezone discrepancies
+            const dateStr = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
             // Check if leave
-            const isLeave = leaves.some((l: any) => {
+            const leaveEntry = leaves.find((l: any) => {
                 const leaveDate = new Date(l.date);
-                return leaveDate.getDate() === i && leaveDate.getMonth() === targetMonth && leaveDate.getFullYear() === targetYear;
+                const leaveDateStr = leaveDate.toISOString().split('T')[0];
+                return leaveDateStr === dateStr;
             });
 
+            const isLeave = !!leaveEntry;
+            const isHalfDay = leaveEntry?.isHalfDay || false;
+            // Capture details
+            const reason = leaveEntry?.reason || '';
+            const isMandatory = leaveEntry?.isMandatory || false;
+
             let status = 'WORKING';
-            if (isWeekend) status = 'WEEKEND';
-            if (isLeave) status = 'LEAVE';
+
+            // Logic: Weekends take precedence over leaves for "Working Day" calculation
+            // If it's a weekend, it's NOT a working day, regardless of leave status.
+            // If it's a weekday, check for leave.
+
+            if (isWeekend) {
+                status = 'WEEKEND';
+            } else if (isLeave) {
+                status = isHalfDay ? 'HALF_DAY' : 'LEAVE';
+            }
 
             if (status === 'WORKING') {
                 cumulativeWorkingDays++;
+            } else if (status === 'HALF_DAY') {
+                cumulativeWorkingDays += 0.5;
             }
+
             if (!isWeekend) {
                 totalWorkingDays++;
             }
@@ -273,12 +301,22 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
                 day: i,
                 date: date.toISOString().split('T')[0],
                 status,
-                cumulative: cumulativeWorkingDays
+                cumulative: cumulativeWorkingDays,
+                reason,       // New field
+                isMandatory   // New field
             });
         }
 
         // Calculate stats from breakdown
-        const leaveDaysCount = dailyBreakdown.filter(d => d.status === 'LEAVE').length;
+        // Count actual leave deduction
+        // FIX: Ensure we only count leaves that fell on working days (Status 'LEAVE' or 'HALF_DAY')
+        // Leaves on weekends would have status 'WEEKEND' and thus are excluded here.
+        const leaveDaysCount = dailyBreakdown.reduce((acc, d) => {
+            if (d.status === 'LEAVE') return acc + 1;
+            if (d.status === 'HALF_DAY') return acc + 0.5;
+            return acc;
+        }, 0);
+
         const actualWorkingDays = cumulativeWorkingDays;
 
         // --- Annual Stats Calculation ---
@@ -290,9 +328,19 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
         }
 
         // Get total assigned days from all projects (Allocated Annually)
-        // Note: usage of 'assignedDays' as 'Annual Budget' is an assumption based on user context "Annually allocated project days"
+        // Filter assignments that are active in the target year
         const assignments = await prisma.projectResource.findMany({
-            where: { userId: id }
+            where: {
+                userId: id,
+                OR: [
+                    { startDate: null },
+                    {
+                        startDate: {
+                            lte: new Date(targetYear, 11, 31)
+                        }
+                    }
+                ]
+            }
         });
         const totalAnnualAssigned = assignments.reduce((acc: number, curr: any) => acc + (curr.assignedDays || 0), 0);
 
@@ -315,14 +363,24 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
         // Optimization: rough calc or detailed loop. Detailed loop is safer.
         for (let d = new Date(targetYear, 0, 1); d <= endOfCalc; d.setDate(d.getDate() + 1)) {
             const day = d.getDay();
-            if (day !== 0 && day !== 6) {
+            const isWeekend = day === 0 || day === 6;
+
+            if (!isWeekend) {
                 // Check leave
-                const isLeave = allYearLeaves.some((l: any) => {
+                const leaveEntry = allYearLeaves.find((l: any) => {
                     const ld = new Date(l.date);
                     return ld.getDate() === d.getDate() && ld.getMonth() === d.getMonth();
                 });
-                if (!isLeave) {
-                    annualExhausted++;
+
+                const isLeave = !!leaveEntry;
+                const isHalfDay = leaveEntry?.isHalfDay || false;
+
+                if (isLeave) {
+                    if (isHalfDay) {
+                        annualExhausted += 0.5;
+                    } else {
+                        annualExhausted += 1;
+                    }
                 }
             }
         }
@@ -381,22 +439,19 @@ export const getResources = async (req: Request, res: Response) => {
         const totalBusinessDaysThisYear = getBusinessDays(startOfYear, endOfYear);
 
         const resourcesWithStats = resources.map((r: any) => {
-            // Allocated Days
-            const allocatedDays = r.resources.reduce((acc: number, curr: any) => acc + (curr.assignedDays || 0), 0);
+            // Allocated Days (Active in Current Year)
+            const allocatedDays = r.resources
+                .filter((pr: any) => !pr.startDate || new Date(pr.startDate).getFullYear() <= now.getFullYear())
+                .reduce((acc: number, curr: any) => acc + (curr.assignedDays || 0), 0);
 
-            // Leaves Taken (Till Date)
-            const leaves = r.leaves.filter((l: any) => new Date(l.date) <= now && new Date(l.date) >= startOfYear);
+            // Leaves Taken (This Year only)
+            const leaves = r.leaves.filter((l: any) => {
+                const leaveDate = new Date(l.date);
+                return leaveDate.getFullYear() === now.getFullYear() && leaveDate <= now;
+            });
             const leavesCount = leaves.reduce((acc: number, l: any) => acc + (l.isHalfDay ? 0.5 : 1), 0);
 
             // Available Working Days (Total Business Days - Leaves Taken)
-            // Or maybe "Remaining Business Days in Year"? 
-            // "Available working days" usually means capacity. 
-            // Let's interpret as: "Total Potential Working Days (Year) - Leaves Taken" 
-            // OR "Allocated - Billed"?
-            // Reading user request: "Number of days allocated to project, Number of leaves taken till date, Available working days"
-            // "Available Working Days" likely means "Total Business Days (YTD or Year) - Leaves".
-            // Let's provide "Total Business Days (Year) - Leaves Taken" as 'availableWorkingDays'.
-
             const availableWorkingDays = totalBusinessDaysThisYear - leavesCount;
 
             return {
@@ -413,5 +468,70 @@ export const getResources = async (req: Request, res: Response) => {
         res.json(resourcesWithStats);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching resources', error });
+    }
+};
+
+// Get monthly working days breakdown for all resources for a given year
+export const getAnnualMonthlyBreakdown = async (req: Request, res: Response) => {
+    try {
+        const { year } = req.query;
+        if (!year) return res.status(400).json({ message: 'Year is required' });
+
+        const targetYear = parseInt(year as string);
+        const resources = await prisma.user.findMany({
+            where: { role: 'RESOURCE' },
+            include: {
+                leaves: {
+                    where: {
+                        date: {
+                            gte: new Date(targetYear, 0, 1),
+                            lte: new Date(targetYear, 11, 31)
+                        }
+                    }
+                }
+            }
+        });
+
+        // Helper to get business days in a month
+        const getBusinessDaysInMonth = (month: number, year: number) => {
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            let count = 0;
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = new Date(year, month, i).getDay();
+                if (day !== 0 && day !== 6) count++;
+            }
+            return count;
+        };
+
+        const result = resources.map(resource => {
+            const monthlyBreakdown: any = {};
+
+            for (let m = 0; m < 12; m++) {
+                const totalBusinessDays = getBusinessDaysInMonth(m, targetYear);
+                const monthLeaves = resource.leaves.filter(l => {
+                    const d = new Date(l.date);
+                    return d.getMonth() === m && d.getFullYear() === targetYear;
+                });
+                const leaveDays = monthLeaves.reduce((acc, l) => acc + (l.isHalfDay ? 0.5 : 1), 0);
+
+                monthlyBreakdown[m] = {
+                    businessDays: totalBusinessDays,
+                    leaveDays: leaveDays,
+                    workingDays: totalBusinessDays - leaveDays
+                };
+            }
+
+            return {
+                id: resource.id,
+                name: resource.name,
+                empId: resource.empId,
+                monthlyBreakdown
+            };
+        });
+
+        res.json(result);
+    } catch (error: any) {
+        console.error('Error fetching annual breakdown:', error);
+        res.status(500).json({ message: 'Error fetching annual breakdown', error: error.message });
     }
 };

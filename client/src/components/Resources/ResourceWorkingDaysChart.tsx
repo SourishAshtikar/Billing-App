@@ -8,11 +8,14 @@ interface ResourceWorkingDaysChartProps {
 
 
 
+import LeaveDetailsModal from './LeaveDetailsModal';
+
 const ResourceWorkingDaysChart: React.FC<ResourceWorkingDaysChartProps> = ({ resourceId }) => {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [month, setMonth] = useState(new Date().getMonth());
     const [year, setYear] = useState(new Date().getFullYear());
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false); // State for modal
 
     useEffect(() => {
         if (resourceId) {
@@ -35,7 +38,9 @@ const ResourceWorkingDaysChart: React.FC<ResourceWorkingDaysChartProps> = ({ res
     if (loading) return <div>Loading chart...</div>;
     if (!data) return <div>No data available</div>;
 
-    // Prepare chart data for Pie Chart
+    // Filter leaves for the modal
+    const currentMonthLeaves = data.dailyBreakdown?.filter((d: any) => d.status === 'LEAVE' || d.status === 'HALF_DAY') || [];
+
     // Prepare chart data for Pie Chart
     const chartData = [
         { name: 'Working Days', value: data?.monthlyStats?.workedDays || 0, color: '#10b981' }, // Green
@@ -44,6 +49,13 @@ const ResourceWorkingDaysChart: React.FC<ResourceWorkingDaysChartProps> = ({ res
 
     return (
         <div style={{ padding: '0 2rem 2rem' }}>
+            {/* Leave Details Modal */}
+            <LeaveDetailsModal
+                isOpen={isLeaveModalOpen}
+                onClose={() => setIsLeaveModalOpen(false)}
+                leaves={currentMonthLeaves}
+            />
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                 <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -63,8 +75,9 @@ const ResourceWorkingDaysChart: React.FC<ResourceWorkingDaysChartProps> = ({ res
                                 onChange={(e) => setYear(Number(e.target.value))}
                                 style={{ padding: '0.4rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
                             >
+                                <option value={2026}>2026</option>
+                                <option value={2025}>2025</option>
                                 <option value={2024}>2024</option>
-                                <option value={2023}>2023</option>
                             </select>
                         </div>
                     </div>
@@ -111,9 +124,23 @@ const ResourceWorkingDaysChart: React.FC<ResourceWorkingDaysChartProps> = ({ res
                                 <span style={{ color: 'var(--text-secondary)' }}>Actual Worked</span>
                                 <span style={{ fontWeight: 600, color: '#10b981' }}>{data?.monthlyStats?.workedDays || 0}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ color: 'var(--text-secondary)' }}>Leaves</span>
-                                <span style={{ fontWeight: 600, color: '#ef4444' }}>{data?.monthlyStats?.leaveDays || 0}</span>
+                                <span
+                                    onClick={() => setIsLeaveModalOpen(true)}
+                                    style={{
+                                        fontWeight: 600,
+                                        color: '#3b82f6', // Make it look clickable (blue)
+                                        cursor: 'pointer',
+                                        textDecoration: 'underline',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.25rem'
+                                    }}
+                                    title="Click to view details"
+                                >
+                                    {data?.monthlyStats?.leaveDays || 0}
+                                </span>
                             </div>
                         </div>
                     </div>
