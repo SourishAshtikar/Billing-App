@@ -27,7 +27,10 @@ CREATE TABLE "Project" (
     "id" TEXT NOT NULL,
     "code" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "description" TEXT,
+    "po" TEXT,
+    "poTotal" DECIMAL(15,2),
+    "currency" TEXT NOT NULL DEFAULT 'USD',
+    "lineItem" TEXT,
     "startDate" TIMESTAMP(3) NOT NULL,
     "endDate" TIMESTAMP(3),
     "status" TEXT NOT NULL DEFAULT 'ACTIVE',
@@ -43,6 +46,7 @@ CREATE TABLE "ProjectResource" (
     "projectId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "rate" DECIMAL(10,2) NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'USD',
     "rateType" "RateType" NOT NULL DEFAULT 'HOURLY',
     "assignedDays" INTEGER DEFAULT 0,
     "startDate" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
@@ -57,6 +61,8 @@ CREATE TABLE "Leave" (
     "userId" TEXT NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
     "reason" TEXT,
+    "isHalfDay" BOOLEAN NOT NULL DEFAULT false,
+    "isMandatory" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Leave_pkey" PRIMARY KEY ("id")

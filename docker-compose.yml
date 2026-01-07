@@ -12,8 +12,10 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - billing-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d billing_db" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d billing_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,6 +36,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - billing-network
 
   client:
     build:
@@ -42,11 +46,16 @@ services:
     restart: always
     ports:
       - "80:80"
-      - "443:443"
     depends_on:
       - server
     environment:
       - VITE_API_URL=/api
+    networks:
+      - billing-network
+
+networks:
+  billing-network:
+    driver: bridge
 
 volumes:
   postgres_data:
