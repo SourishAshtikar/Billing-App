@@ -86,6 +86,8 @@ export const billing = {
 // Users
 export const users = {
     getAll: () => api.get('/users'),
+    create: (data: any) => api.post('/users', data),
+    update: (id: string, data: any) => api.put(`/users/${id}`, data),
     updateRole: (id: string, role: string) => api.put(`/users/${id}/role`, { role }),
 };
 

@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Calendar, CreditCard, Users, Settings, LogOut } from 'lucide-react';
+import { Home, Calendar, CreditCard, Users, Settings, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
-    role: 'ADMIN' | 'MANAGER' | 'RESOURCE';
+    role: 'ADMIN' | 'MANAGER' | 'RESOURCE' | 'ADMIN_VIEWER';
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ role }) => {
@@ -44,13 +44,13 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                     <Home size={20} /> Dashboard
                 </NavLink>
 
-                {(role === 'RESOURCE' || role === 'ADMIN') && (
+                {(role === 'RESOURCE' || role === 'ADMIN' || role === 'ADMIN_VIEWER') && (
                     <NavLink to="/leaves" style={linkStyle}>
-                        <Calendar size={20} /> {role === 'ADMIN' ? 'Manage Leaves' : 'My Leaves'}
+                        <Calendar size={20} /> {(role === 'ADMIN' || role === 'ADMIN_VIEWER') ? 'Manage Leaves' : 'My Leaves'}
                     </NavLink>
                 )}
 
-                {role === 'ADMIN' && (
+                {(role === 'ADMIN' || role === 'ADMIN_VIEWER') && (
                     <>
                         <NavLink to="/projects" style={linkStyle}>
                             <Users size={20} /> Projects
@@ -60,6 +60,9 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                         </NavLink>
                         <NavLink to="/reports" style={linkStyle}>
                             <CreditCard size={20} /> Billing & Reports
+                        </NavLink>
+                        <NavLink to="/users" style={linkStyle}>
+                            <Shield size={20} /> User Management
                         </NavLink>
                     </>
                 )}

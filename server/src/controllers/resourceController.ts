@@ -299,7 +299,7 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
 
             dailyBreakdown.push({
                 day: i,
-                date: date.toISOString().split('T')[0],
+                date: dateStr, // Use pre-calculated dateStr to avoid timezone shifts
                 status,
                 cumulative: cumulativeWorkingDays,
                 reason,       // New field
@@ -319,71 +319,122 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
 
         const actualWorkingDays = cumulativeWorkingDays;
 
-        // --- Annual Stats Calculation ---
+        const now = new Date();
         const startOfYear = new Date(targetYear, 0, 1);
-        const endOfCalc = new Date(); // Up to today for exhausted calculation
-        // If viewing past year, end at Dec 31
-        if (targetYear < new Date().getFullYear()) {
-            endOfCalc.setFullYear(targetYear, 11, 31);
-        }
+        const endOfYear = new Date(targetYear, 11, 31);
 
-        // Get total assigned days from all projects (Allocated Annually)
-        // Filter assignments that are active in the target year
+        // Helper to get business days in a month
+        const getBusinessDaysInMonth = (m: number, y: number) => {
+            const daysInMonth = new Date(y, m + 1, 0).getDate();
+            let count = 0;
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = new Date(y, m, i).getDay();
+                if (day !== 0 && day !== 6) count++;
+            }
+            return count;
+        };
+
+        // Get total assigned days (Budget)
         const assignments = await prisma.projectResource.findMany({
             where: {
                 userId: id,
                 OR: [
                     { startDate: null },
-                    {
-                        startDate: {
-                            lte: new Date(targetYear, 11, 31)
-                        }
-                    }
+                    { startDate: { lte: endOfYear } }
                 ]
             }
         });
         const totalAnnualAssigned = assignments.reduce((acc: number, curr: any) => acc + (curr.assignedDays || 0), 0);
 
         // Calculate exhausted days for the whole year (Business days - Leaves)
-        // We need all leaves for the year
         const allYearLeaves = await prisma.leave.findMany({
             where: {
                 userId: id,
                 date: {
                     gte: startOfYear,
-                    lte: new Date(targetYear, 11, 31)
+                    lte: endOfYear
                 }
             }
         });
 
+        const totalAppliedAnnual = allYearLeaves.reduce((acc: number, l: any) => acc + (l.isHalfDay ? 0.5 : 1), 0);
+
+        // Calculate Exhausted YTD proportionally
+        // Exhausted = Sum over months M <= current of (AllocatedInM * (ActualWorkedInM / BusinessDaysInM))
         let annualExhausted = 0;
-        const currentDayOfYear = Math.floor((endOfCalc.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+        const currentMonth = targetYear === now.getFullYear() ? now.getMonth() : (targetYear < now.getFullYear() ? 11 : -1);
 
-        // Loop through every day of year up to 'now' to count working days
-        // Optimization: rough calc or detailed loop. Detailed loop is safer.
-        for (let d = new Date(targetYear, 0, 1); d <= endOfCalc; d.setDate(d.getDate() + 1)) {
-            const day = d.getDay();
-            const isWeekend = day === 0 || day === 6;
+        if (currentMonth >= 0) {
+            for (let m = 0; m <= currentMonth; m++) {
+                const bizDays = getBusinessDaysInMonth(m, targetYear);
+                const monthLeaves = allYearLeaves.filter(l => new Date(l.date).getMonth() === m);
+                const leaveDays = monthLeaves.reduce((acc, l) => acc + (l.isHalfDay ? 0.5 : 1), 0);
 
-            if (!isWeekend) {
-                // Check leave
-                const leaveEntry = allYearLeaves.find((l: any) => {
-                    const ld = new Date(l.date);
-                    return ld.getDate() === d.getDate() && ld.getMonth() === d.getMonth();
-                });
+                // If it's the current month, we only count business days up to today
+                let businessDaysPassed = bizDays;
+                let actualWorkedInMonth = bizDays - leaveDays;
 
-                const isLeave = !!leaveEntry;
-                const isHalfDay = leaveEntry?.isHalfDay || false;
-
-                if (isLeave) {
-                    if (isHalfDay) {
-                        annualExhausted += 0.5;
-                    } else {
-                        annualExhausted += 1;
+                if (m === now.getMonth() && targetYear === now.getFullYear()) {
+                    // Count business days passed so far in current month
+                    businessDaysPassed = 0;
+                    for (let d = 1; d <= now.getDate(); d++) {
+                        const dayOfWeek = new Date(targetYear, m, d).getDay();
+                        if (dayOfWeek !== 0 && dayOfWeek !== 6) businessDaysPassed++;
                     }
+                    // Actual worked so far in this month is (Business Days Passed - Leaves Taken So Far)
+                    // (Assuming allYearLeaves already filtered for this month)
+                    actualWorkedInMonth = businessDaysPassed - leaveDays;
+                }
+
+                // Contribution to exhaustion = (ActualWorked / BusinessDaysTotal) * Allocated
+                // We use bizDays as the denominator to represent the full month's capacity
+                // BUT if we only want to show "how much of the ALREADY PASSED days are exhausted":
+                // Exhausted = (Percentage of month passed) * Allocated - Leaves? No.
+                // Simpler: Exhausted is the portion of the Yearly Total that "should have been worked"
+                // minus the impact of leaves.
+
+                // Let's use the Ratio approach:
+                // If a month has 20 biz days and 10 allocated days.
+                // Working 20 days = 10 exhausted.
+                // Working 10 days = 5 exhausted.
+                const monthAllocation = totalAnnualAssigned / 12; // Assuming even distribution if not monthly
+                // Actually, totalAnnualAssigned IS the sum of all assignments.
+                // Let's just use the business days worked as the direct exhaust if we want it "based on total".
+                // User said: "Worked YTD & Remaining should be calculated based on the Yearly total"
+                // This likely means: Worked YTD = (Actual Worked Business Days / Total Annual Business Days) * Yearly Total.
+
+                if (m < currentMonth || (m === currentMonth && targetYear === now.getFullYear())) {
+                    // For completed months or current month up to now
+                    // We'll calculate it in a cleaner way below outside the loop for simplicity
                 }
             }
         }
+
+        // Revised Proportional Logic:
+        const totalBizDaysYear = Array.from({ length: 12 }, (_, i) => getBusinessDaysInMonth(i, targetYear)).reduce((a, b) => a + b, 0);
+
+        let bizDaysWorkedYTD = 0;
+        const endOfYTD = targetYear === now.getFullYear() ? now : endOfYear;
+        if (targetYear <= now.getFullYear()) {
+            for (let d = new Date(targetYear, 0, 1); d <= endOfYTD; d.setDate(d.getDate() + 1)) {
+                const day = d.getDay();
+                if (day !== 0 && day !== 6) {
+                    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    const leaveEntry = allYearLeaves.find(l => {
+                        const ld = new Date(l.date);
+                        const ldStr = `${ld.getFullYear()}-${String(ld.getMonth() + 1).padStart(2, '0')}-${String(ld.getDate()).padStart(2, '0')}`;
+                        return ldStr === dateStr;
+                    });
+                    const isLeave = !!leaveEntry;
+                    const isHalfDay = leaveEntry?.isHalfDay || false;
+                    bizDaysWorkedYTD += isLeave ? (isHalfDay ? 0.5 : 0) : 1;
+                }
+            }
+        }
+
+        // Exhausted = Actual Worked Business Days (Attendance so far)
+        // Remained = Budget (allocated) - Attendance so far
+        annualExhausted = bizDaysWorkedYTD;
 
         res.json({
             month: targetMonth,
@@ -398,7 +449,8 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
                 year: targetYear,
                 allocated: totalAnnualAssigned,
                 exhausted: annualExhausted,
-                remained: totalAnnualAssigned - annualExhausted
+                remained: totalAnnualAssigned - annualExhausted,
+                totalApplied: totalAppliedAnnual
             },
             dailyBreakdown
         });
@@ -481,6 +533,7 @@ export const getAnnualMonthlyBreakdown = async (req: Request, res: Response) => 
         const resources = await prisma.user.findMany({
             where: { role: 'RESOURCE' },
             include: {
+                resources: true, // Project Assignments
                 leaves: {
                     where: {
                         date: {
@@ -503,8 +556,12 @@ export const getAnnualMonthlyBreakdown = async (req: Request, res: Response) => 
             return count;
         };
 
+        const now = new Date();
+        now.setHours(23, 59, 59, 999); // Include today in YTD
+
         const result = resources.map(resource => {
             const monthlyBreakdown: any = {};
+            let bizDaysWorkedYTD = 0;
 
             for (let m = 0; m < 12; m++) {
                 const totalBusinessDays = getBusinessDaysInMonth(m, targetYear);
@@ -521,11 +578,50 @@ export const getAnnualMonthlyBreakdown = async (req: Request, res: Response) => 
                 };
             }
 
+            // Calculate Total Assigned (Allocated Annually)
+            const totalAssigned = resource.resources
+                .filter((pr: any) => !pr.startDate || new Date(pr.startDate).getFullYear() <= targetYear)
+                .reduce((acc: number, curr: any) => acc + (curr.assignedDays || 0), 0);
+
+            // Calculate ratios for Worked YTD & Remaining based on Total Assigned
+            const totalBizDaysYear = Array.from({ length: 12 }, (_, i) => getBusinessDaysInMonth(i, targetYear)).reduce((a: number, b: number) => a + b, 0);
+            bizDaysWorkedYTD = 0;
+            const endOfYTD = targetYear === now.getFullYear() ? now : new Date(targetYear, 11, 31, 23, 59, 59);
+
+            if (targetYear <= now.getFullYear()) {
+                for (let m = 0; m < 12; m++) {
+                    const daysInMonth = new Date(targetYear, m + 1, 0).getDate();
+                    for (let d = 1; d <= daysInMonth; d++) {
+                        const date = new Date(targetYear, m, d);
+                        if (date > endOfYTD) break;
+                        const dayOfWeek = date.getDay();
+                        if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+
+                        const dateStr = `${targetYear}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                        const leaveEntry = resource.leaves.find(l => {
+                            const ld = new Date(l.date);
+                            const ldStr = `${ld.getFullYear()}-${String(ld.getMonth() + 1).padStart(2, '0')}-${String(ld.getDate()).padStart(2, '0')}`;
+                            return ldStr === dateStr;
+                        });
+
+                        const isLeave = !!leaveEntry;
+                        const isHalfDay = leaveEntry?.isHalfDay || false;
+                        bizDaysWorkedYTD += isLeave ? (isHalfDay ? 0.5 : 0) : 1;
+                    }
+                }
+            }
+
+            const workedYTD = bizDaysWorkedYTD;
+            const remainingDays = totalAssigned - workedYTD;
+
             return {
                 id: resource.id,
                 name: resource.name,
                 empId: resource.empId,
-                monthlyBreakdown
+                monthlyBreakdown,
+                workedYTD,
+                remainingDays,
+                totalAssigned
             };
         });
 

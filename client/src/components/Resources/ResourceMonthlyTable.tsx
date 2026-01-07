@@ -54,50 +54,54 @@ const ResourceMonthlyTable: React.FC<ResourceMonthlyTableProps> = ({ onResourceC
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: '#f8fafc' }}>
-                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem' }}>Resource Name</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem', position: 'sticky', left: 0, backgroundColor: '#f8fafc', zIndex: 10 }}>Resource Name</th>
                                 {months.map(m => (
                                     <th key={m} style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem', textAlign: 'center' }}>{m}</th>
                                 ))}
-                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem', textAlign: 'center' }}>Total</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem', textAlign: 'center', backgroundColor: '#f0fdf4' }}>Worked YTD</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem', textAlign: 'center', backgroundColor: '#eff6ff' }}>Remaining</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, fontSize: '0.875rem', textAlign: 'center', backgroundColor: '#f1f5f9' }}>Yearly Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {data.map((item) => {
-                                let yearlyTotal = 0;
-                                return (
-                                    <tr key={item.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background-color 0.2s' }}>
-                                        <td style={{ padding: '1rem', fontSize: '0.875rem', fontWeight: 500 }}>
-                                            <span
-                                                onClick={() => onResourceClick && onResourceClick(item.id)}
-                                                style={{
-                                                    cursor: onResourceClick ? 'pointer' : 'default',
-                                                    color: onResourceClick ? 'var(--primary-color)' : 'inherit',
-                                                    textDecoration: onResourceClick ? 'underline' : 'none',
-                                                    fontWeight: 'bold'
-                                                }}
-                                            >
-                                                {item.name}
-                                            </span>
-                                        </td>
-                                        {months.map((_, index) => {
-                                            const monthData = item.monthlyBreakdown[index];
-                                            const workingDays = monthData?.workingDays || 0;
-                                            yearlyTotal += workingDays;
-                                            return (
-                                                <td key={index} style={{ padding: '1rem', fontSize: '0.875rem', textAlign: 'center' }}>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                        <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{workingDays}</span>
-                                                        <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>/{monthData?.businessDays}</span>
-                                                    </div>
-                                                </td>
-                                            );
-                                        })}
-                                        <td style={{ padding: '1rem', fontSize: '0.875rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f1f5f9' }}>
-                                            {yearlyTotal.toFixed(1)}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                            {data.map((item) => (
+                                <tr key={item.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background-color 0.2s' }}>
+                                    <td style={{ padding: '1rem', fontSize: '0.875rem', fontWeight: 500, position: 'sticky', left: 0, backgroundColor: '#ffffff', zIndex: 5 }}>
+                                        <span
+                                            onClick={() => onResourceClick && onResourceClick(item.id)}
+                                            style={{
+                                                cursor: onResourceClick ? 'pointer' : 'default',
+                                                color: onResourceClick ? 'var(--primary-color)' : 'inherit',
+                                                textDecoration: onResourceClick ? 'underline' : 'none',
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            {item.name}
+                                        </span>
+                                    </td>
+                                    {months.map((_, index) => {
+                                        const monthData = item.monthlyBreakdown[index];
+                                        const workingDays = monthData?.workingDays || 0;
+                                        return (
+                                            <td key={index} style={{ padding: '1rem', fontSize: '0.875rem', textAlign: 'center' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                    <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{workingDays}</span>
+                                                    <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>/{monthData?.businessDays}</span>
+                                                </div>
+                                            </td>
+                                        );
+                                    })}
+                                    <td style={{ padding: '1rem', fontSize: '0.875rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f0fdf4', color: '#15803d' }}>
+                                        {item.workedYTD?.toFixed(1) || '0.0'}
+                                    </td>
+                                    <td style={{ padding: '1rem', fontSize: '0.875rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
+                                        {item.remainingDays?.toFixed(1) || '0.0'}
+                                    </td>
+                                    <td style={{ padding: '1rem', fontSize: '0.875rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#f1f5f9' }}>
+                                        {(item.totalAssigned || 0).toFixed(1)}
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>

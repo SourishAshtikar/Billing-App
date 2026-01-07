@@ -58,30 +58,7 @@ const calculateBillableDays = async (userId: string, month: number, year: number
     };
 };
 
-const calculateCumulativeDays = async (userId: string, projectId: string, startDate: Date) => {
-    // Simple calc: Working days from start date to NOW
-    // This is expensive if we do meaningful business day calc for potentially years.
-    // For MVP, days between dates - weekends. Leaves are tricky to sum for all history without performance hit.
-    // Let's do: (Today - StartDate) in days -> remove weekends estimate.
 
-    const now = new Date();
-    if (startDate > now) return 0;
-
-    // Rough business days calc
-    let count = 0;
-    const cur = new Date(startDate);
-    while (cur <= now) {
-        const day = cur.getDay();
-        if (day !== 0 && day !== 6) count++;
-        cur.setDate(cur.getDate() + 1);
-    }
-
-    // Deduct total leaves for this user in this range?
-    // Optimization: Just count without leaves for 'Cumulative Working Days' or exact?
-    // Requirement says "Cummulative working days", usually implies actual worked.
-    // Let's limit to simple business days for performance unless requested otherwise.
-    return count;
-};
 
 // Get billing stats for a specific project (or ALL)
 export const getProjectBillingStats = async (req: Request, res: Response) => {
@@ -135,39 +112,37 @@ export const getProjectBillingStats = async (req: Request, res: Response) => {
                 let aggregatedCost = 0;
                 let aggregatedExpectedDays = 0;
                 let aggregatedActualDays = 0;
-                // For Cumulative, it's always from start date to NOW, regardless of filtered view? 
-                // Usually Cumulative field in report means "Life to date". 
-                // "Actual Days" column in report implies "For the selected period".
 
-                for (let currentM = startMonth; currentM <= endMonth; currentM++) {
+                // Cumulative YTD logic: sum from Jan up to endMonth
+                let cumulativeWorkingDaysYTD = 0;
+
+                for (let currentM = 0; currentM <= endMonth; currentM++) {
                     const { totalBusinessDays, actualBillableDays } = await calculateBillableDays(pr.userId, currentM, y);
 
-                    const rate = Number(pr.rate);
-                    let cost = 0;
-                    const rateType = (pr as any).rateType;
+                    // Period stats (could be just one month or YTD range)
+                    if (currentM >= startMonth) {
+                        const rate = Number(pr.rate);
+                        let cost = 0;
+                        const rateType = (pr as any).rateType;
 
-                    if (rateType === 'DAILY') {
-                        cost = actualBillableDays * rate;
-                    } else {
-                        // HOURLY default 8 hours
-                        cost = actualBillableDays * 8 * rate;
+                        if (rateType === 'DAILY') {
+                            cost = actualBillableDays * rate;
+                        } else {
+                            cost = actualBillableDays * 8 * rate;
+                        }
+
+                        aggregatedCost += cost;
+                        aggregatedExpectedDays += totalBusinessDays;
+                        aggregatedActualDays += actualBillableDays;
                     }
 
-                    aggregatedCost += cost;
-                    aggregatedExpectedDays += totalBusinessDays;
-                    aggregatedActualDays += actualBillableDays;
+                    // Always sum for the whole year up to selected month for Cumulative
+                    cumulativeWorkingDaysYTD += actualBillableDays;
                 }
 
                 totalProjectCost += aggregatedCost;
 
-                // Cumulative Life-to-Date
-                const cumulativeDays = await calculateCumulativeDays(pr.userId, project.id, (pr as any).startDate || pr.assignedAt);
-
-                // Add or Merge resource stats?
-                // If 'ALL' view, identifying duplicate resources across projects?
-                // Usually report is "By Line Item per Project". So we keep project context.
-
-                // Calculate leaves for this period (sum of filtered months)
+                // Calculate leaves for selected period
                 let totalLeavesInPeriod = 0;
                 for (let currentM = startMonth; currentM <= endMonth; currentM++) {
                     const { leaveDaysCount } = await calculateBillableDays(pr.userId, currentM, y);
@@ -180,18 +155,18 @@ export const getProjectBillingStats = async (req: Request, res: Response) => {
                     projectId: project.id,
                     projectName: project.name,
                     po: project.po || '-',
-                    lineItem: project.lineItem || '-',
-                    rate: Number(pr.rate), // For YTD, rate might change? Assuming static for MVP
+                    rate: Number(pr.rate),
                     rateType: (pr as any).rateType,
                     annualWorkingDays: pr.assignedDays || 0,
                     expectedWorkingDays: aggregatedExpectedDays,
                     actualWorkingDays: aggregatedActualDays,
-                    cumulativeWorkingDays: cumulativeDays,
+                    cumulativeWorkingDays: cumulativeWorkingDaysYTD,
                     cost: aggregatedCost,
                     leavesTaken: totalLeavesInPeriod,
-                    totalBilled: aggregatedCost, // In this period context
+                    totalBilled: aggregatedCost,
                     currency: (pr as any).currency || 'USD'
                 });
+
             }
         }
 

@@ -9,9 +9,9 @@ COPY prisma ./prisma/
 
 RUN npm install
 
-# Copy source and build
+# Copy source first to generate Prisma Client with code context
 COPY . .
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://user:pass@localhost:5432/db" npx prisma generate
 RUN npm run build
 
 # Production stage
@@ -30,12 +30,13 @@ COPY --from=builder /app/prisma ./prisma
 # Create uploads directory and set permissions
 RUN mkdir -p /app/uploads && chmod 755 /app/uploads
 
-# Set up a non-root user
-RUN addgroup -S nodejs && adduser -S billingapp -G nodejs && chown -R billingapp:nodejs /app
-USER billingapp
+# Add a non-root user for security
+RUN addgroup -S nodejs && adduser -S nextjs -G nodejs && chown -R nextjs:nodejs /app
+USER nextjs
 
 EXPOSE 3001
 
+# Wait for database and run server
 HEALTHCHECK --interval=30s --timeout=3s \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 

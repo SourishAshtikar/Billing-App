@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Upload } from 'lucide-react';
 import { resources } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import ResourceEditModal from '../components/Resources/ResourceEditModal';
 import CSVUploadModal from '../components/Resources/CSVUploadModal';
 import ResourceAnalyticsModal from '../components/Resources/ResourceAnalyticsModal';
@@ -20,6 +21,7 @@ interface Resource {
 }
 
 const Resources: React.FC = () => {
+    const { user } = useAuth();
     const [resourceList, setResourceList] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -104,42 +106,44 @@ const Resources: React.FC = () => {
         <div style={{ padding: '2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Resources</h1>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button
-                        onClick={() => setIsCSVModalOpen(true)}
-                        style={{
-                            backgroundColor: 'transparent',
-                            color: 'var(--primary-color)',
-                            border: '1px solid var(--primary-color)',
-                            padding: '0.75rem 1.5rem',
-                            borderRadius: 'var(--radius-md)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            cursor: 'pointer',
-                            fontSize: '1rem'
-                        }}
-                    >
-                        <Upload size={20} /> Import CSV
-                    </button>
-                    <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        style={{
-                            backgroundColor: 'var(--primary-color)',
-                            color: 'white',
-                            border: 'none',
-                            padding: '0.75rem 1.5rem',
-                            borderRadius: 'var(--radius-md)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            cursor: 'pointer',
-                            fontSize: '1rem'
-                        }}
-                    >
-                        <Plus size={20} /> Add Resource
-                    </button>
-                </div>
+                {user?.role === 'ADMIN' && (
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            onClick={() => setIsCSVModalOpen(true)}
+                            style={{
+                                backgroundColor: 'transparent',
+                                color: 'var(--primary-color)',
+                                border: '1px solid var(--primary-color)',
+                                padding: '0.75rem 1.5rem',
+                                borderRadius: 'var(--radius-md)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                cursor: 'pointer',
+                                fontSize: '1rem'
+                            }}
+                        >
+                            <Upload size={20} /> Import CSV
+                        </button>
+                        <button
+                            onClick={() => setIsAddModalOpen(true)}
+                            style={{
+                                backgroundColor: 'var(--primary-color)',
+                                color: 'white',
+                                border: 'none',
+                                padding: '0.75rem 1.5rem',
+                                borderRadius: 'var(--radius-md)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                cursor: 'pointer',
+                                fontSize: '1rem'
+                            }}
+                        >
+                            <Plus size={20} /> Add Resource
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Monthly Breakdown Table */}
@@ -225,6 +229,7 @@ const Resources: React.FC = () => {
                 onEdit={handleEditClick}
                 onDelete={handleDeleteClick}
                 onAnalytics={handleAnalyticsClick}
+                role={user?.role}
             />
 
             {/* Edit Modal */}

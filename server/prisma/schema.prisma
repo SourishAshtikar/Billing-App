@@ -85,6 +85,7 @@ model BillingReport {
 
 enum Role {
   ADMIN
+  ADMIN_VIEWER
   MANAGER
   RESOURCE
 }

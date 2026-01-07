@@ -1,6 +1,6 @@
 import express from 'express';
 import { getProjects, createProject, getProjectById, updateProject, deleteProject, removeResourceFromProject } from '../controllers/projectController';
-import { protect, admin } from '../middleware/authMiddleware';
+import { protect, admin, adminViewer } from '../middleware/authMiddleware';
 
 const router = express.Router();
 

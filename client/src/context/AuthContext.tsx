@@ -7,7 +7,7 @@ interface User {
     email: string;
     empId?: string;
     joiningDate?: string;
-    role: 'ADMIN' | 'MANAGER' | 'RESOURCE';
+    role: 'ADMIN' | 'MANAGER' | 'RESOURCE' | 'ADMIN_VIEWER';
 }
 
 interface AuthContextType {

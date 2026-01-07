@@ -84,7 +84,6 @@ const BillingReports: React.FC = () => {
         const doc = new jsPDF();
         const projectName = selectedProject === 'ALL' ? 'All Projects' : projects.find(p => p.id === selectedProject)?.name || 'Project';
         const periodText = selectedMonth === 'ALL' ? 'YTD' : new Date(selectedYear, selectedMonth as number).toLocaleString('default', { month: 'long' });
-        // Include Year in the title
         const year = selectedYear;
         const titleText = selectedMonth === 'ALL' ? `YTD Report - ${year}` : `${periodText} ${year}`;
 
@@ -94,7 +93,7 @@ const BillingReports: React.FC = () => {
         doc.setFontSize(11);
         doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
 
-        const tableColumn = ["Sr.No", "Resource Name", "Project", "PO", "Line Item", "Expected", "Leaves", "Actual", "Cumulative", "Rate", "Billing Amount"];
+        const tableColumn = ["Sr.No", "Resource Name", "Project Name", "PO", "Expected", "Actual", "Cumulative YTD", "Leaves", "Rate", "Billing Amount"];
         const tableRows: any[] = [];
 
         filteredReports.forEach((item, index) => {
@@ -104,11 +103,10 @@ const BillingReports: React.FC = () => {
                 item.resourceName,
                 item.projectName || '-',
                 item.po || '-',
-                item.lineItem || '-',
                 item.expectedWorkingDays || 0,
-                item.leavesTaken || 0,
                 item.actualWorkingDays || 0,
                 item.cumulativeWorkingDays || 0,
+                item.leavesTaken || 0,
                 `${symbol}${item.rate}`,
                 `${symbol}${Number(item.cost).toLocaleString()}`
             ];
@@ -123,11 +121,11 @@ const BillingReports: React.FC = () => {
         const symbol = getSymbol(filteredReports[0]?.currency || 'USD');
 
         tableRows.push([
-            "", "Total", "", "", "",
+            "", "Total", "", "",
             totalExpected,
-            totalLeaves,
             totalActual,
             "-",
+            totalLeaves,
             "-",
             `${symbol}${totalCost.toLocaleString()}`
         ]);
@@ -237,20 +235,19 @@ const BillingReports: React.FC = () => {
                                         <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left', backgroundColor: '#f8fafc' }}>
                                             <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Sr.No</th>
                                             <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Resource Name</th>
-                                            {selectedProject === 'ALL' && <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Project</th>}
+                                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Project Name</th>
                                             <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>PO</th>
-                                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Line Item</th>
                                             <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center' }}>Expected</th>
-                                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center' }}>Leaves</th>
                                             <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center' }}>Actual</th>
-                                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center' }}>Cumulative</th>
+                                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center' }}>Cumulative YTD</th>
+                                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center' }}>Leaves</th>
                                             <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Rate</th>
                                             <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Billing Amt</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {filteredReports.length === 0 ? (
-                                            <tr><td colSpan={11} style={{ padding: '1rem', textAlign: 'center' }}>No billing data matches your filters.</td></tr>
+                                            <tr><td colSpan={10} style={{ padding: '1rem', textAlign: 'center' }}>No billing data matches your filters.</td></tr>
                                         ) : (
                                             <>
                                                 {filteredReports.map((item, idx) => {
@@ -259,13 +256,12 @@ const BillingReports: React.FC = () => {
                                                         <tr key={idx} style={{ borderBottom: '1px solid var(--border-color)' }}>
                                                             <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>{idx + 1}</td>
                                                             <td style={{ padding: '0.75rem', fontWeight: 500, fontSize: '0.875rem' }}>{item.resourceName}</td>
-                                                            {selectedProject === 'ALL' && <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{item.projectName}</td>}
+                                                            <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{item.projectName}</td>
                                                             <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>{item.po || '-'}</td>
-                                                            <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>{item.lineItem || '-'}</td>
                                                             <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.875rem' }}>{item.expectedWorkingDays || 0}</td>
-                                                            <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--danger-color)' }}>{item.leavesTaken || 0}</td>
                                                             <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600 }}>{item.actualWorkingDays || 0}</td>
                                                             <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.875rem' }}>{item.cumulativeWorkingDays || 0}</td>
+                                                            <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--danger-color)' }}>{item.leavesTaken || 0}</td>
                                                             <td style={{ padding: '0.75rem', textAlign: 'right', fontSize: '0.875rem' }}>{symbol}{item.rate}</td>
                                                             <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600, fontSize: '0.875rem' }}>{symbol}{Number(item.cost).toLocaleString()}</td>
                                                         </tr>
@@ -273,11 +269,11 @@ const BillingReports: React.FC = () => {
                                                 })}
                                                 {/* Totals Row */}
                                                 <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold', borderTop: '2px solid var(--border-color)' }}>
-                                                    <td colSpan={selectedProject === 'ALL' ? 5 : 4} style={{ padding: '0.75rem', textAlign: 'right' }}>Total:</td>
+                                                    <td colSpan={4} style={{ padding: '0.75rem', textAlign: 'right' }}>Total:</td>
                                                     <td style={{ padding: '0.75rem', textAlign: 'center' }}>{filteredReports.reduce((sum, item) => sum + (item.expectedWorkingDays || 0), 0)}</td>
-                                                    <td style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--danger-color)' }}>{filteredReports.reduce((sum, item) => sum + (item.leavesTaken || 0), 0)}</td>
                                                     <td style={{ padding: '0.75rem', textAlign: 'center' }}>{filteredReports.reduce((sum, item) => sum + (item.actualWorkingDays || 0), 0)}</td>
                                                     <td style={{ padding: '0.75rem', textAlign: 'center' }}>-</td>
+                                                    <td style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--danger-color)' }}>{filteredReports.reduce((sum, item) => sum + (item.leavesTaken || 0), 0)}</td>
                                                     <td style={{ padding: '0.75rem', textAlign: 'right' }}>-</td>
                                                     <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                                                         {getSymbol(filteredReports[0]?.currency || 'USD')}

@@ -46,13 +46,20 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
 
 export const admin = (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore
-    console.log('admin middleware - user role:', req.user?.role);
-    // @ts-ignore
-    if (req.user && req.user.role === 'ADMIN') {
-        console.log('admin middleware - access granted');
+    const role = req.user?.role;
+    if (role === 'ADMIN') {
         next();
     } else {
-        console.log('admin middleware - access denied');
         res.status(401).json({ message: 'Not authorized as an admin' });
+    }
+};
+
+export const adminViewer = (req: Request, res: Response, next: NextFunction) => {
+    // @ts-ignore
+    const role = req.user?.role;
+    if (role === 'ADMIN' || role === 'ADMIN_VIEWER') {
+        next();
+    } else {
+        res.status(401).json({ message: 'Not authorized as an admin or viewer' });
     }
 };

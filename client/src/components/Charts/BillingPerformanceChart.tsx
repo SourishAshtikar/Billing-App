@@ -70,6 +70,7 @@ const BillingPerformanceChart: React.FC = () => {
             // Calculate Monthly Data with Capped Expected & Cumulative for Trend
             let runningExpectedTotal = 0;
             let cumulativeExpectedForTrend = 0;
+            let cumulativeActualForTrend = 0;
 
             const chartData = res.data.data.map((item: any) => {
                 const rawExpected = item.expectedCost || 0;
@@ -82,16 +83,16 @@ const BillingPerformanceChart: React.FC = () => {
                     runningExpectedTotal += displayExpected;
                 }
 
-                // Cumulative Trend Logic (Projecting when PO is achieved)
-                // We use the raw or capped expected? Usually Trend implies projection based on expectation.
-                // Let's use the capped running total to align with the monthly bars
+                // Cumulative Trend Logic
                 cumulativeExpectedForTrend += displayExpected;
+                cumulativeActualForTrend += (item.cost || 0);
 
                 return {
                     ...item,
                     cost: item.cost, // Monthly Actual
                     expectedCost: displayExpected, // Monthly Expected
-                    cumulativeExpectedForTrend // Cumulative Trend
+                    cumulativeExpectedForTrend, // Cumulative Trend (Projected)
+                    cumulativeActualForTrend // Cumulative Actual (Consumed)
                 };
             });
             setData(chartData);
@@ -162,19 +163,31 @@ const BillingPerformanceChart: React.FC = () => {
                         <Legend />
 
                         <Line yAxisId="left" type="monotone" dataKey="cost" stroke="#166534" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Monthly Actual" />
-                        <Line yAxisId="left" type="monotone" dataKey="expectedCost" stroke="#1e3a8a" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Monthly Expected" />
+                        <Line yAxisId="left" type="monotone" dataKey="expectedCost" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Monthly Expected" />
 
                         {poTotal > 0 && selectedProject !== 'ALL' && (
-                            <Line
-                                yAxisId="right"
-                                type="monotone"
-                                dataKey="cumulativeExpectedForTrend"
-                                stroke="#f59e0b"
-                                strokeWidth={2}
-                                dot={false}
-                                strokeDasharray="5 5"
-                                name="Cumulative Trend (PO Projection)"
-                            />
+                            <>
+                                <Line
+                                    yAxisId="right"
+                                    type="monotone"
+                                    dataKey="cumulativeActualForTrend"
+                                    stroke="#ec4899"
+                                    strokeWidth={2}
+                                    dot={false}
+                                    strokeDasharray="5 5"
+                                    name="Cumulative Actual (Consumed PO)"
+                                />
+                                <Line
+                                    yAxisId="right"
+                                    type="monotone"
+                                    dataKey="cumulativeExpectedForTrend"
+                                    stroke="#f59e0b"
+                                    strokeWidth={2}
+                                    dot={false}
+                                    strokeDasharray="5 5"
+                                    name="Cumulative Expected (PO Projection)"
+                                />
+                            </>
                         )}
 
                         {poTotal > 0 && (

@@ -157,6 +157,10 @@ const ResourceWorkingDaysChart: React.FC<ResourceWorkingDaysChartProps> = ({ res
                                 <span style={{ color: 'var(--text-secondary)' }}>Annual Exhausted (YTD)</span>
                                 <span style={{ fontWeight: 600, color: '#f59e0b' }}>{data?.annualStats?.exhausted || 0} days</span>
                             </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-secondary)' }}>Total Applied Leaves</span>
+                                <span style={{ fontWeight: 600, color: '#3b82f6' }}>{data?.annualStats?.totalApplied || 0} days</span>
+                            </div>
                             <div style={{ paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
                                 <span style={{ color: 'var(--text-secondary)' }}>Remained Annual</span>
                                 <span style={{ fontWeight: 600, color: (data?.annualStats?.remained || 0) < 0 ? '#ef4444' : '#10b981' }}>

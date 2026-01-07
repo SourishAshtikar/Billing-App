@@ -1,12 +1,11 @@
 FROM postgres:15-alpine
 
-# Copy the initialization script to the Docker entrypoint directory
-# Scripts in /docker-entrypoint-initdb.d/ are executed in alphabetical order
+# Copy the initialization script
 COPY init.sql /docker-entrypoint-initdb.d/
 
-# Set environment variables (can be overridden in docker-compose.yml)
+# Default environment variables (overridden by docker-compose)
 ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=postgres
+ENV POSTGRES_PASSWORD=billingappdb
 ENV POSTGRES_DB=billing_db
 
 EXPOSE 5432

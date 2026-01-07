@@ -17,6 +17,7 @@ interface ResourceActionsModalProps {
     onEdit: (resource: Resource) => void;
     onDelete: (resource: Resource) => void;
     onAnalytics: (resource: Resource) => void;
+    role?: string;
 }
 
 const ResourceActionsModal: React.FC<ResourceActionsModalProps> = ({
@@ -25,7 +26,8 @@ const ResourceActionsModal: React.FC<ResourceActionsModalProps> = ({
     resource,
     onEdit,
     onDelete,
-    onAnalytics
+    onAnalytics,
+    role
 }) => {
     if (!isOpen || !resource) return null;
 
@@ -91,54 +93,58 @@ const ResourceActionsModal: React.FC<ResourceActionsModalProps> = ({
                         View Analytics
                     </button>
 
-                    <button
-                        onClick={() => { onEdit(resource); onClose(); }}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: '1rem',
-                            padding: '1rem', borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--border-color)',
-                            backgroundColor: 'var(--bg-main)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            fontSize: '1rem',
-                            fontWeight: 500
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
-                    >
-                        <div style={{
-                            padding: '0.5rem', borderRadius: '50%',
-                            backgroundColor: 'rgba(168, 85, 247, 0.1)', color: '#a855f7'
-                        }}>
-                            <Edit size={20} />
-                        </div>
-                        Edit Resource
-                    </button>
+                    {role === 'ADMIN' && (
+                        <>
+                            <button
+                                onClick={() => { onEdit(resource); onClose(); }}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '1rem',
+                                    padding: '1rem', borderRadius: 'var(--radius-md)',
+                                    border: '1px solid var(--border-color)',
+                                    backgroundColor: 'var(--bg-main)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    fontSize: '1rem',
+                                    fontWeight: 500
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
+                                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                            >
+                                <div style={{
+                                    padding: '0.5rem', borderRadius: '50%',
+                                    backgroundColor: 'rgba(168, 85, 247, 0.1)', color: '#a855f7'
+                                }}>
+                                    <Edit size={20} />
+                                </div>
+                                Edit Resource
+                            </button>
 
-                    <button
-                        onClick={() => { onDelete(resource); onClose(); }}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: '1rem',
-                            padding: '1rem', borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--border-color)',
-                            backgroundColor: 'var(--bg-main)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            fontSize: '1rem',
-                            fontWeight: 500,
-                            color: 'var(--danger-color)'
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--danger-color)'}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
-                    >
-                        <div style={{
-                            padding: '0.5rem', borderRadius: '50%',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444'
-                        }}>
-                            <Trash2 size={20} />
-                        </div>
-                        Delete Resource
-                    </button>
+                            <button
+                                onClick={() => { onDelete(resource); onClose(); }}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '1rem',
+                                    padding: '1rem', borderRadius: 'var(--radius-md)',
+                                    border: '1px solid var(--border-color)',
+                                    backgroundColor: 'var(--bg-main)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    fontSize: '1rem',
+                                    fontWeight: 500,
+                                    color: 'var(--danger-color)'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--danger-color)'}
+                                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                            >
+                                <div style={{
+                                    padding: '0.5rem', borderRadius: '50%',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444'
+                                }}>
+                                    <Trash2 size={20} />
+                                </div>
+                                Delete Resource
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
             <style>{`

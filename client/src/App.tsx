@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Resources from './pages/Resources';
 import Settings from './pages/Settings';
 import ResourceDashboard from './pages/ResourceDashboard';
+import UserManagement from './pages/UserManagement';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -29,7 +30,7 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
 };
 const RoleBasedDashboard = () => {
   const { user } = useAuth();
-  if (user?.role === 'ADMIN') return <AdminDashboard />;
+  if (user?.role === 'ADMIN' || user?.role === 'ADMIN_VIEWER') return <AdminDashboard />;
   if (user?.role === 'MANAGER') return <ManagerDashboard />;
   return <ResourceDashboard />; // RESOURCE
 };
@@ -50,23 +51,28 @@ const AppRoutes = () => {
 
         {/* Admin Routes */}
         <Route path="/projects" element={
-          <ProtectedRoute allowedRoles={['ADMIN']}>
+          <ProtectedRoute allowedRoles={['ADMIN', 'ADMIN_VIEWER']}>
             <Projects />
           </ProtectedRoute>
         } />
         <Route path="/resources" element={
-          <ProtectedRoute allowedRoles={['ADMIN']}>
+          <ProtectedRoute allowedRoles={['ADMIN', 'ADMIN_VIEWER']}>
             <Resources />
           </ProtectedRoute>
         } />
         <Route path="/reports" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
+          <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER', 'ADMIN_VIEWER']}>
             <BillingReports />
           </ProtectedRoute>
         } />
         <Route path="/settings" element={
           <ProtectedRoute>
             <Settings />
+          </ProtectedRoute>
+        } />
+        <Route path="/users" element={
+          <ProtectedRoute allowedRoles={['ADMIN', 'ADMIN_VIEWER']}>
+            <UserManagement />
           </ProtectedRoute>
         } />
 

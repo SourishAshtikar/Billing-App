@@ -5,11 +5,13 @@ import Modal from '../components/UI/Modal';
 import type { Project } from '../types';
 import { Plus, Folder, Edit, Users } from 'lucide-react';
 import { projects as projectApi } from '../services/api.ts';
+import { useAuth } from '../context/AuthContext';
 
 import ManageResourcesModal from '../components/Projects/ManageResourcesModal';
 import ProjectEditModal from '../components/Projects/ProjectEditModal';
 
 const Projects: React.FC = () => {
+    const { user } = useAuth();
     const [projects, setProjects] = useState<Project[]>([]);
     const [showModal, setShowModal] = useState(false);
     const [showResourceModal, setShowResourceModal] = useState(false);
@@ -79,9 +81,11 @@ const Projects: React.FC = () => {
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Projects</h1>
-                <Button onClick={() => setShowModal(true)}>
-                    <Plus size={20} /> New Project
-                </Button>
+                {user?.role === 'ADMIN' && (
+                    <Button onClick={() => setShowModal(true)}>
+                        <Plus size={20} /> New Project
+                    </Button>
+                )}
             </div>
 
             {loading ? <p>Loading projects...</p> : (
@@ -118,20 +122,24 @@ const Projects: React.FC = () => {
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{project.name}</h3>
-                                <button
-                                    onClick={() => handleEditClick(project)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}
-                                    title="Edit"
-                                >
-                                    <Edit size={16} />
-                                </button>
+                                {user?.role === 'ADMIN' && (
+                                    <button
+                                        onClick={() => handleEditClick(project)}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}
+                                        title="Edit"
+                                    >
+                                        <Edit size={16} />
+                                    </button>
+                                )}
                             </div>
                             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
                                 {project.description}
                             </p>
 
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <Button size="sm" onClick={() => openResourceModal(project)}>Manage Resources</Button>
+                                <Button size="sm" onClick={() => openResourceModal(project)}>
+                                    {user?.role === 'ADMIN' ? 'Manage Resources' : 'View Resources'}
+                                </Button>
                             </div>
                         </Card>
                     ))}

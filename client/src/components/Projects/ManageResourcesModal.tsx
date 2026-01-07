@@ -3,6 +3,7 @@ import { Trash2, Edit } from 'lucide-react';
 import Modal from '../UI/Modal';
 import Button from '../UI/Button';
 import { resources as resourceApi, projects as projectApi } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 interface ManageResourcesModalProps {
     isOpen: boolean;
@@ -12,6 +13,7 @@ interface ManageResourcesModalProps {
 }
 
 const ManageResourcesModal: React.FC<ManageResourcesModalProps> = ({ isOpen, onClose, projectId, projectName }) => {
+    const { user } = useAuth();
     const [assignedResources, setAssignedResources] = useState<any[]>([]);
     const [allResources, setAllResources] = useState<any[]>([]);
     const [selectedResourceId, setSelectedResourceId] = useState('');
@@ -95,119 +97,121 @@ const ManageResourcesModal: React.FC<ManageResourcesModalProps> = ({ isOpen, onC
         <Modal isOpen={isOpen} onClose={onClose} title={`Manage Resources: ${projectName}`}>
             {loading ? <p>Loading...</p> : (
                 <div>
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <h4 style={{ marginBottom: '0.75rem', fontWeight: 600 }}>{isEditing ? 'Edit Assignment' : 'New Assignment'}</h4>
-                        <div style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '0.4rem',
-                            backgroundColor: '#f9fafb',
-                            padding: '0.75rem',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--border-color)'
-                        }}>
-                            <select
-                                value={selectedResourceId}
-                                onChange={(e) => setSelectedResourceId(e.target.value)}
-                                disabled={isEditing}
-                                style={{
-                                    flex: '1 1 100%',
-                                    padding: '0.5rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    fontSize: '0.875rem'
-                                }}
-                            >
-                                <option value="">Select Resource</option>
-                                {allResources.filter((r: any) => r.role === 'RESOURCE').map((r: any) => (
-                                    <option key={r.id} value={r.id}>{r.name}</option>
-                                ))}
-                            </select>
+                    {user?.role === 'ADMIN' && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <h4 style={{ marginBottom: '0.75rem', fontWeight: 600 }}>{isEditing ? 'Edit Assignment' : 'New Assignment'}</h4>
+                            <div style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '0.4rem',
+                                backgroundColor: '#f9fafb',
+                                padding: '0.75rem',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid var(--border-color)'
+                            }}>
+                                <select
+                                    value={selectedResourceId}
+                                    onChange={(e) => setSelectedResourceId(e.target.value)}
+                                    disabled={isEditing}
+                                    style={{
+                                        flex: '1 1 100%',
+                                        padding: '0.5rem',
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid var(--border-color)',
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
+                                    <option value="">Select Resource</option>
+                                    {allResources.filter((r: any) => r.role === 'RESOURCE').map((r: any) => (
+                                        <option key={r.id} value={r.id}>{r.name}</option>
+                                    ))}
+                                </select>
 
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                title="Assignment Start Date"
-                                style={{
-                                    flex: '1 1 120px',
-                                    padding: '0.4rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    fontSize: '0.875rem'
-                                }}
-                            />
-                            <input
-                                type="number"
-                                value={rate}
-                                onChange={(e) => setRate(Number(e.target.value))}
-                                placeholder="Rate"
-                                style={{
-                                    width: '60px',
-                                    padding: '0.4rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    fontSize: '0.875rem'
-                                }}
-                            />
-                            <select
-                                value={currency}
-                                onChange={(e) => setCurrency(e.target.value)}
-                                style={{
-                                    width: '65px',
-                                    padding: '0.4rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    fontSize: '0.875rem'
-                                }}
-                            >
-                                <option value="USD">USD</option>
-                                <option value="INR">INR</option>
-                                <option value="EUR">EUR</option>
-                                <option value="GBP">GBP</option>
-                            </select>
-                            <input
-                                type="number"
-                                value={assignedDays}
-                                onChange={(e) => setAssignedDays(Number(e.target.value))}
-                                placeholder="Days"
-                                title="Assigned Billable Days"
-                                style={{
-                                    width: '55px',
-                                    padding: '0.4rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    fontSize: '0.875rem'
-                                }}
-                            />
-                            <select
-                                value={rateType}
-                                onChange={(e) => setRateType(e.target.value)}
-                                style={{
-                                    flex: '1 1 80px',
-                                    padding: '0.4rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    fontSize: '0.875rem'
-                                }}
-                            >
-                                <option value="HOURLY">Hourly</option>
-                                <option value="DAILY">Daily</option>
-                            </select>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    title="Assignment Start Date"
+                                    style={{
+                                        flex: '1 1 120px',
+                                        padding: '0.4rem',
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid var(--border-color)',
+                                        fontSize: '0.875rem'
+                                    }}
+                                />
+                                <input
+                                    type="number"
+                                    value={rate}
+                                    onChange={(e) => setRate(Number(e.target.value))}
+                                    placeholder="Rate"
+                                    style={{
+                                        width: '60px',
+                                        padding: '0.4rem',
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid var(--border-color)',
+                                        fontSize: '0.875rem'
+                                    }}
+                                />
+                                <select
+                                    value={currency}
+                                    onChange={(e) => setCurrency(e.target.value)}
+                                    style={{
+                                        width: '65px',
+                                        padding: '0.4rem',
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid var(--border-color)',
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
+                                    <option value="USD">USD</option>
+                                    <option value="INR">INR</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                </select>
+                                <input
+                                    type="number"
+                                    value={assignedDays}
+                                    onChange={(e) => setAssignedDays(Number(e.target.value))}
+                                    placeholder="Days"
+                                    title="Assigned Billable Days"
+                                    style={{
+                                        width: '55px',
+                                        padding: '0.4rem',
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid var(--border-color)',
+                                        fontSize: '0.875rem'
+                                    }}
+                                />
+                                <select
+                                    value={rateType}
+                                    onChange={(e) => setRateType(e.target.value)}
+                                    style={{
+                                        flex: '1 1 80px',
+                                        padding: '0.4rem',
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid var(--border-color)',
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
+                                    <option value="HOURLY">Hourly</option>
+                                    <option value="DAILY">Daily</option>
+                                </select>
 
-                            <div style={{ display: 'flex', gap: '0.4rem', flex: '1 1 100%', marginTop: '0.25rem' }}>
-                                <Button size="sm" onClick={handleAssign} disabled={!selectedResourceId} style={{ flex: 1 }}>
-                                    {isEditing ? 'Update Assignment' : 'Assign Resource'}
-                                </Button>
-                                {isEditing && (
-                                    <Button size="sm" variant="secondary" onClick={() => {
-                                        setIsEditing(false);
-                                        setSelectedResourceId('');
-                                    }}>Cancel</Button>
-                                )}
+                                <div style={{ display: 'flex', gap: '0.4rem', flex: '1 1 100%', marginTop: '0.25rem' }}>
+                                    <Button size="sm" onClick={handleAssign} disabled={!selectedResourceId} style={{ flex: 1 }}>
+                                        {isEditing ? 'Update Assignment' : 'Assign Resource'}
+                                    </Button>
+                                    {isEditing && (
+                                        <Button size="sm" variant="secondary" onClick={() => {
+                                            setIsEditing(false);
+                                            setSelectedResourceId('');
+                                        }}>Cancel</Button>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     <div>
                         <h4 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Assigned Resources</h4>
@@ -227,20 +231,24 @@ const ManageResourcesModal: React.FC<ManageResourcesModalProps> = ({ isOpen, onC
                                                 {ar.currency || '$'}{ar.rate}/{ar.rateType === 'DAILY' ? 'd' : 'h'} • {ar.assignedDays || 0}d
                                             </span>
                                             <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                                <button
-                                                    onClick={() => handleEditClick(ar)}
-                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
-                                                    title="Edit"
-                                                >
-                                                    <Edit size={14} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleRemoveResource(ar.userId)}
-                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger-color, #ef4444)' }}
-                                                    title="Remove"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
+                                                {user?.role === 'ADMIN' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleEditClick(ar)}
+                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                                                            title="Edit"
+                                                        >
+                                                            <Edit size={14} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRemoveResource(ar.userId)}
+                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger-color, #ef4444)' }}
+                                                            title="Remove"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
                                     </li>

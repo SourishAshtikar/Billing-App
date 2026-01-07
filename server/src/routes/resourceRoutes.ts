@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { assignResource, getResources, createResource, updateResource, deleteResource, getResourceWorkingDays, getAnnualMonthlyBreakdown } from '../controllers/resourceController';
 import { bulkImportResources } from '../controllers/csvController';
-import { protect, admin } from '../middleware/authMiddleware';
+import { protect, admin, adminViewer } from '../middleware/authMiddleware';
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
@@ -20,10 +20,10 @@ router.post('/assign', protect, admin, assignResource);
 router.get('/', protect, getResources);
 
 // GET /api/resources/:id/working-days - Get working days analytics
-router.get('/:id/working-days', protect, admin, getResourceWorkingDays);
+router.get('/:id/working-days', protect, adminViewer, getResourceWorkingDays);
 
 // GET /api/resources/annual-breakdown - Get annual breakdown for all resources
-router.get('/annual-breakdown', protect, admin, getAnnualMonthlyBreakdown);
+router.get('/annual-breakdown', protect, adminViewer, getAnnualMonthlyBreakdown);
 
 // PUT /api/resources/:id - Update resource (admin only)
 router.put('/:id', protect, admin, updateResource);
