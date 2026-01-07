@@ -5,6 +5,7 @@ import Button from '../components/UI/Button';
 import { billing as billingApi, projects as projectApi } from '../services/api.ts';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 const BillingReports: React.FC = () => {
     const [reports, setReports] = useState<any[]>([]);
@@ -141,6 +142,55 @@ const BillingReports: React.FC = () => {
         doc.save(`Billing_Report_${projectName.replace(/\s+/g, '_')}_${titleText.replace(/\s+/g, '_')}.pdf`);
     };
 
+    const handleExportExcel = () => {
+        const projectName = selectedProject === 'ALL' ? 'All Projects' : projects.find(p => p.id === selectedProject)?.name || 'Project';
+        const periodText = selectedMonth === 'ALL' ? 'YTD' : new Date(selectedYear, selectedMonth as number).toLocaleString('default', { month: 'long' });
+        const year = selectedYear;
+        const titleText = selectedMonth === 'ALL' ? `YTD Report - ${year}` : `${periodText} ${year}`;
+
+        // Prepare data for Excel
+        const excelData = filteredReports.map((item, index) => ({
+            "Sr.No": index + 1,
+            "Resource Name": item.resourceName,
+            "Project Name": item.projectName || '-',
+            "PO": item.po || '-',
+            "Expected Working Days": item.expectedWorkingDays || 0,
+            "Actual Working Days": item.actualWorkingDays || 0,
+            "Cumulative YTD": item.cumulativeWorkingDays || 0,
+            "Leaves Taken": item.leavesTaken || 0,
+            "Rate": item.rate,
+            "Currency": item.currency || 'USD',
+            "Billing Amount": Number(item.cost)
+        }));
+
+        // Add Totals
+        const totalExpected = filteredReports.reduce((sum, item) => sum + (item.expectedWorkingDays || 0), 0);
+        const totalLeaves = filteredReports.reduce((sum, item) => sum + (item.leavesTaken || 0), 0);
+        const totalActual = filteredReports.reduce((sum, item) => sum + (item.actualWorkingDays || 0), 0);
+        const totalCost = filteredReports.reduce((sum, item) => sum + Number(item.cost || 0), 0);
+
+        excelData.push({
+            "Sr.No": null as any,
+            "Resource Name": "Total",
+            "Project Name": null as any,
+            "PO": null as any,
+            "Expected Working Days": totalExpected,
+            "Actual Working Days": totalActual,
+            "Cumulative YTD": null as any,
+            "Leaves Taken": totalLeaves,
+            "Rate": null as any,
+            "Currency": null as any,
+            "Billing Amount": totalCost
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Billing Report");
+
+        // Download file
+        XLSX.writeFile(workbook, `Billing_Report_${projectName.replace(/\s+/g, '_')}_${titleText.replace(/\s+/g, '_')}.xlsx`);
+    };
+
     const months = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
@@ -183,6 +233,9 @@ const BillingReports: React.FC = () => {
                         </select>
                         <Button variant="secondary" onClick={handleExportPDF}>
                             <Download size={18} /> Export PDF
+                        </Button>
+                        <Button variant="secondary" onClick={handleExportExcel} style={{ backgroundColor: '#16a34a', color: 'white', border: 'none' }}>
+                            <Download size={18} /> Export Excel
                         </Button>
                     </div>
                 </div>
