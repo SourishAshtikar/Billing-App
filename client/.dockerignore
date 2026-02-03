@@ -13,5 +13,4 @@ yarn-error.log*
 .dockerignore
 Dockerfile
 docker-compose.yml
-nginx.conf
 README.md

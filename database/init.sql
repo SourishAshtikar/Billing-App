@@ -5,7 +5,8 @@ CREATE SCHEMA IF NOT EXISTS "public";
 CREATE TYPE "RateType" AS ENUM ('HOURLY', 'DAILY');
 
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'MANAGER', 'RESOURCE');
+CREATE TYPE "Role" AS ENUM ('ADMIN', 'MANAGER', 'RESOURCE', 'ADMIN_VIEWER');
+
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -27,6 +28,7 @@ CREATE TABLE "Project" (
     "id" TEXT NOT NULL,
     "code" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "description" TEXT,
     "po" TEXT,
     "poTotal" DECIMAL(15,2),
     "currency" TEXT NOT NULL DEFAULT 'USD',

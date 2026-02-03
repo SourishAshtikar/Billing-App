@@ -16,7 +16,7 @@ This guide provides instructions on how to deploy the Billing Application using 
 2. **Run with Docker Compose**
    From the root directory, run:
    ```bash
-   docker-compose up --build -d
+   docker compose up --build -d
    ```
    *This will:*
    - Build the PostgreSQL database and initialize schemas using `database/init.sql`.
@@ -31,7 +31,7 @@ This guide provides instructions on how to deploy the Billing Application using 
 ## Components Details
 
 ### 1. Database (`billing-db`)
-- **Image**: `postgres:15-alpine`
+- **Image**: `postgres:18-alpine`
 - **Port**: `5432`
 - **Data Persistence**: Volumes are mapped to `billing_db_data`.
 - **Initialization**: Automatically runs `database/init.sql` on first startup.
@@ -48,15 +48,20 @@ This guide provides instructions on how to deploy the Billing Application using 
 
 ## Troubleshooting
 
-- **Database Connectivity**: If the server fails to connect to the DB, ensure the `db` service is healthy (`docker-compose ps`).
+- **Database Connectivity**: If the server fails to connect to the DB, ensure the `db` service is healthy (`docker compose ps`).
 - **Logs**: View logs for a specific service using:
   ```bash
-  docker-compose logs -f server
+  docker compose logs -f server
   ```
+
 - **Rebuilding**: If you make code changes, rebuild the stack:
   ```bash
-  docker-compose up --build -d
+  docker compose up --build -d
   ```
+
+## Database Restoration
+For instructions on how to restore the database from the included backup (seed data), please refer to [DB_RESTORE_GUIDE.md](./DB_RESTORE_GUIDE.md).
+
 
 ---
 > [!NOTE]

@@ -35,7 +35,10 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
         }}>
             <div style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--accent-color)' }}></div>
-                HCLTech.
+                AI-Billing app
+            </div>
+            <div style={{ fontSize: '0.7rem', opacity: 0.5, marginBottom: '1rem', paddingLeft: '0.5rem' }}>
+                &copy; SSA
             </div>
 
             <nav style={{ flex: 1 }}>

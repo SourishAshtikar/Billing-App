@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 import { Outlet } from 'react-router-dom';
 
 interface LayoutProps {
-    role?: 'ADMIN' | 'MANAGER' | 'RESOURCE'; // In real app, get from Context
+    role?: 'ADMIN' | 'MANAGER' | 'RESOURCE' | 'ADMIN_VIEWER'; // In real app, get from Context
 }
 
 const Layout: React.FC<LayoutProps> = ({ role = 'ADMIN' }) => {

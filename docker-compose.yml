@@ -6,15 +6,15 @@ services:
     container_name: billing-db
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=billingappdb
-      - POSTGRES_DB=billing_db
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-billingappdb}
+      - POSTGRES_DB=${POSTGRES_DB:-billing_db}
     ports:
       - "5432:5432"
     volumes:
       - billing_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d billing_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-billing_db}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,13 +28,13 @@ services:
     container_name: billing-server
     restart: always
     environment:
-      - DATABASE_URL=postgresql://postgres:billingappdb@db:5432/billing_db?schema=public
-      - JWT_SECRET=f6702b7eedad2b0085b91dbc40e62f58
-      - CLIENT_URL=http://localhost
-      - PORT=3001
-      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-billingappdb}@db:5432/${POSTGRES_DB:-billing_db}?schema=public
+      - JWT_SECRET=${JWT_SECRET:-f6702b7eedad2b0085b91dbc40e62f58}
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:8080}
+      - PORT=${PORT:-3001}
+      - NODE_ENV=${NODE_ENV:-production}
     ports:
-      - "3001:3001"
+      - "${PORT:-3001}:${PORT:-3001}"
     depends_on:
       db:
         condition: service_healthy
@@ -48,11 +48,11 @@ services:
     container_name: billing-client
     restart: always
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - server
     environment:
-      - VITE_API_URL=/api
+      - VITE_API_URL=${VITE_API_URL:-/api}
     networks:
       - billing-network
 

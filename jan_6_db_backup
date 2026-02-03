@@ -1,0 +1,173 @@
+--
+-- PostgreSQL database dump
+--
+
+\restrict WPEVvyyDdibDb9IuVVwnhfmkjjbvkh9LoGQofJrJjStwgAqxdTa7NOWsna1N9QV
+
+-- Dumped from database version 18.1
+-- Dumped by pg_dump version 18.1
+
+-- Started on 2026-01-07 18:47:11
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 4956 (class 0 OID 16649)
+-- Dependencies: 219
+-- Data for Name: BillingReport; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."BillingReport" (id, "projectId", month, year, "totalAmount", "generatedAt") FROM stdin;
+\.
+
+
+--
+-- TOC entry 4957 (class 0 OID 16661)
+-- Dependencies: 220
+-- Data for Name: Leave; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Leave" (id, "userId", date, reason, "createdAt", "isHalfDay", "isMandatory") FROM stdin;
+4608afce-3c13-4610-99c0-b8b1142615d8	5f18d59d-e474-4830-8bca-88c9c1345411	2026-02-04 00:00:00	Full Day	2025-12-18 12:50:12.959	f	f
+bf4bf45e-b90a-41e2-acee-ae2f76188029	b91244cb-e4b7-44e3-afc6-b20ae1ccfcff	2026-01-26 00:00:00	Republic Day	2025-12-27 12:55:03.204	f	t
+d55aa268-333d-428c-9eb6-2b3b292299f3	b5368a47-10d8-449f-8e3d-a01dd1dc69f6	2026-01-26 00:00:00	Republic Day	2025-12-27 12:55:03.223	f	t
+13f12169-08d0-4043-8708-a2b40c245703	b91244cb-e4b7-44e3-afc6-b20ae1ccfcff	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.256	f	t
+730bc9a6-383e-49d7-a441-d86334717d7d	0d75f89b-a7f5-4837-9f42-4073c6aba018	2026-01-01 00:00:00	New Year	2025-12-27 12:55:03.151	f	t
+c678bf10-699c-4bcf-9c08-2e8aee76861f	ab3f87e7-ae34-405c-b294-e0c9ecc6ed21	2026-01-01 00:00:00	New Year	2025-12-27 12:55:03.157	f	t
+79e779b6-6b3a-4260-b997-52ed7bab16fb	663360e5-d1ba-442f-b844-443b277dfd6b	2026-01-01 00:00:00	New Year	2025-12-27 12:55:03.163	f	t
+0bc34d53-3199-452e-95cc-81d79c5046e2	b5368a47-10d8-449f-8e3d-a01dd1dc69f6	2026-01-01 00:00:00	New Year	2025-12-27 12:55:03.167	f	t
+d8348ca4-7b00-45f0-857b-20295bf22c35	fa1f86fb-c183-44b5-beea-ddde2be0f9be	2026-01-01 00:00:00	New Year	2025-12-27 12:55:03.177	f	t
+a85298ae-b696-42af-9061-6aa38faa7407	644133ea-64f2-4d30-bed0-99c03e676063	2026-01-01 00:00:00	New Year	2025-12-27 12:55:03.182	f	t
+fe04bddf-f1d9-46c5-93ce-4ebe58459834	5f18d59d-e474-4830-8bca-88c9c1345411	2026-01-01 00:00:00	New Year	2025-12-20 08:21:08.648	f	t
+528e1e4a-6a61-4935-b551-0a1df4f75d30	0d75f89b-a7f5-4837-9f42-4073c6aba018	2026-01-26 00:00:00	Republic Day	2025-12-27 12:55:03.209	f	t
+7b32f17c-500c-421f-9940-371026a4a9fa	ab3f87e7-ae34-405c-b294-e0c9ecc6ed21	2026-01-26 00:00:00	Republic Day	2025-12-27 12:55:03.214	f	t
+090a1469-7a0d-439c-ab0d-91cb7516f98b	663360e5-d1ba-442f-b844-443b277dfd6b	2026-01-26 00:00:00	Republic Day	2025-12-22 15:36:48.385	f	t
+c8e44bd4-0d62-44df-9908-4eb02bdd5891	824883c4-8428-4aad-b4f3-0cf01761a8f8	2026-01-26 00:00:00	Republic Day	2025-12-27 12:55:03.229	f	t
+4ca8f9e3-1723-4dcb-b103-cbbd9d1e13c3	fa1f86fb-c183-44b5-beea-ddde2be0f9be	2026-01-26 00:00:00	Republic Day	2025-12-27 12:55:03.233	f	t
+8376501e-6e3d-406c-a878-9e6ed11e4437	644133ea-64f2-4d30-bed0-99c03e676063	2026-01-26 00:00:00	Republic Day	2025-12-27 12:55:03.238	f	t
+2e131fc3-068e-4e94-9fb5-3aac2b1da96e	5f18d59d-e474-4830-8bca-88c9c1345411	2026-01-26 00:00:00	Republic Day	2025-12-20 08:21:18.561	f	t
+68be839a-9484-4599-8d6e-08d2421b61d5	0d75f89b-a7f5-4837-9f42-4073c6aba018	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.261	f	t
+9f2c33f8-484a-45f4-b32f-60d3dfa09389	ab3f87e7-ae34-405c-b294-e0c9ecc6ed21	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.268	f	t
+e05b5ebf-3d3d-41ab-9e94-3d54b8423a9c	663360e5-d1ba-442f-b844-443b277dfd6b	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.275	f	t
+34106b57-dd62-49f7-b657-240b9e4b07de	b5368a47-10d8-449f-8e3d-a01dd1dc69f6	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.28	f	t
+e3fa489b-9e32-4e2d-98b3-8d008a2a5e90	824883c4-8428-4aad-b4f3-0cf01761a8f8	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.285	f	t
+5aa8492e-a96b-4371-a7c8-1bc69528fb37	fa1f86fb-c183-44b5-beea-ddde2be0f9be	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.29	f	t
+7d49339c-7d4a-45b8-99d0-0af9c72dc77b	644133ea-64f2-4d30-bed0-99c03e676063	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.296	f	t
+4258adb2-71c5-40bd-a362-a7f09ddb81ef	e1e12293-2bf8-41d1-8ac9-30094704ecd4	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.303	f	t
+d2bbf5f7-02d9-422a-89e6-2cc1ce5b62ca	5f18d59d-e474-4830-8bca-88c9c1345411	2026-05-01 00:00:00	Independance Day	2025-12-27 12:55:03.307	f	t
+0fd56b33-ebb7-4bfe-98f5-1546959bff87	b91244cb-e4b7-44e3-afc6-b20ae1ccfcff	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.315	f	t
+5c1b6f47-899c-4d3f-ba0e-a882731ecae7	0d75f89b-a7f5-4837-9f42-4073c6aba018	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.32	f	t
+65364577-ad28-4ec8-abd2-a7e8b181b593	ab3f87e7-ae34-405c-b294-e0c9ecc6ed21	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.325	f	t
+955445e6-74ce-4143-8b1a-95b1052bae61	663360e5-d1ba-442f-b844-443b277dfd6b	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.331	f	t
+4b25e4ad-c92f-4a22-a3a7-9d6181a7be8b	b5368a47-10d8-449f-8e3d-a01dd1dc69f6	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.335	f	t
+91dd60b6-b71e-4a53-aa2e-4b76c5786259	824883c4-8428-4aad-b4f3-0cf01761a8f8	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.34	f	t
+f4d7b84f-49aa-4843-bbb9-f7393a10c0f0	fa1f86fb-c183-44b5-beea-ddde2be0f9be	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.345	f	t
+2adcf7d5-d0df-4530-b523-a87266d9f399	644133ea-64f2-4d30-bed0-99c03e676063	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.349	f	t
+5dfeb7dc-6ead-49ab-9155-80d7b0d35e16	e1e12293-2bf8-41d1-8ac9-30094704ecd4	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.354	f	t
+fd548105-cebb-4be6-b890-f8a9ddaebeb0	5f18d59d-e474-4830-8bca-88c9c1345411	2026-08-15 00:00:00	Independance Day	2025-12-27 12:55:03.358	f	t
+034715c9-f17d-41c1-9d71-df067b199c65	b91244cb-e4b7-44e3-afc6-b20ae1ccfcff	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.365	f	t
+727f3d3a-323d-4cc8-b446-ae3650974bb4	0d75f89b-a7f5-4837-9f42-4073c6aba018	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.371	f	t
+6a7479a9-65d7-47ab-b361-1688890a4016	ab3f87e7-ae34-405c-b294-e0c9ecc6ed21	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.377	f	t
+a1664320-069a-4cc8-9b54-371bc2473edd	b5368a47-10d8-449f-8e3d-a01dd1dc69f6	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.386	f	t
+11c5a6e6-b345-4cec-8118-79bdd1df234f	824883c4-8428-4aad-b4f3-0cf01761a8f8	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.391	f	t
+2bc6bd75-924c-420f-b747-b6f9b5fde59c	fa1f86fb-c183-44b5-beea-ddde2be0f9be	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.396	f	t
+21ad864d-7df8-434f-af74-611c1a373084	644133ea-64f2-4d30-bed0-99c03e676063	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.401	f	t
+9f536702-03d4-4b54-8e07-c7f83b4eecbc	e1e12293-2bf8-41d1-8ac9-30094704ecd4	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.406	f	t
+1047709e-920a-4c3d-bb47-56796a868f6f	5f18d59d-e474-4830-8bca-88c9c1345411	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.411	f	t
+828754be-91cf-49a4-94ad-408d3ba95d77	b91244cb-e4b7-44e3-afc6-b20ae1ccfcff	2026-01-01 00:00:00	New Year	2025-12-27 12:55:03.138	f	t
+5ec57c35-ec81-4849-ace6-ea8a388e8108	824883c4-8428-4aad-b4f3-0cf01761a8f8	2026-01-01 00:00:00	New Year	2025-12-27 12:55:03.172	f	t
+3e170498-0602-4564-83e4-8f802a0efb1e	663360e5-d1ba-442f-b844-443b277dfd6b	2026-10-02 00:00:00	Independance Day	2025-12-27 12:55:03.381	f	t
+5f03aa71-d426-4276-b1ce-5bc1fd3d3d3b	b91244cb-e4b7-44e3-afc6-b20ae1ccfcff	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.418	f	t
+b14b1aa2-78f3-4aeb-88c3-3f535ef79db2	0d75f89b-a7f5-4837-9f42-4073c6aba018	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.425	f	t
+90d9d731-b960-40c3-970d-e58a5191fca8	ab3f87e7-ae34-405c-b294-e0c9ecc6ed21	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.43	f	t
+258f7062-8a65-45d4-8a59-ffeb92e42a2f	663360e5-d1ba-442f-b844-443b277dfd6b	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.435	f	t
+3708cb79-8800-49bf-b1f6-3ce9da3e4dd1	b5368a47-10d8-449f-8e3d-a01dd1dc69f6	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.439	f	t
+b6380b45-686d-41a9-aac6-7d4e56460116	824883c4-8428-4aad-b4f3-0cf01761a8f8	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.444	f	t
+ec827ee3-fe4c-45f5-8869-a883cdcbbf5c	fa1f86fb-c183-44b5-beea-ddde2be0f9be	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.448	f	t
+d908ffbd-bcd7-440c-94ea-a6484d853345	644133ea-64f2-4d30-bed0-99c03e676063	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.453	f	t
+4d82e531-3d8e-41f8-98f0-c46151698157	e1e12293-2bf8-41d1-8ac9-30094704ecd4	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.459	f	t
+77fea253-145d-4af5-8174-6c2e742a937e	5f18d59d-e474-4830-8bca-88c9c1345411	2026-10-21 00:00:00	Independance Day	2025-12-27 12:55:03.464	f	t
+4c51a240-7fbe-4c32-a586-e8bb9bd869c3	5f18d59d-e474-4830-8bca-88c9c1345411	2026-01-22 00:00:00	Full Day	2026-01-02 08:30:33.106	f	f
+2b9fc0da-98cd-4c18-90f2-9549e5d8c9ee	fa1f86fb-c183-44b5-beea-ddde2be0f9be	2026-03-04 00:00:00	Full Day	2026-01-05 07:47:07.852	f	t
+7a7e3324-98fd-4e99-a7cb-4b41938a2ee0	fa1f86fb-c183-44b5-beea-ddde2be0f9be	2026-04-14 00:00:00	Full Day	2026-01-05 07:47:16.147	f	t
+1da7ab87-b1a1-4e77-926a-55056ae8eb2d	824883c4-8428-4aad-b4f3-0cf01761a8f8	2026-04-14 00:00:00	Full Day	2026-01-05 07:47:34.716	f	t
+4bfdd329-d224-401a-979d-3fdb93cc649a	824883c4-8428-4aad-b4f3-0cf01761a8f8	2026-03-04 00:00:00	Full Day	2026-01-05 07:47:41.599	f	t
+78c0c366-e48f-4e59-b5ca-7de089b6d64f	e1e12293-2bf8-41d1-8ac9-30094704ecd4	2026-01-01 00:00:00	New Year day	2026-01-06 16:42:37.38	f	t
+1ebcfa2f-4380-4e4d-8ee4-1cebe780ce1c	e1e12293-2bf8-41d1-8ac9-30094704ecd4	2026-01-26 00:00:00	Republic Day	2026-01-06 16:42:49.216	f	t
+\.
+
+
+--
+-- TOC entry 4958 (class 0 OID 16675)
+-- Dependencies: 221
+-- Data for Name: Project; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Project" (id, code, name, description, "startDate", "endDate", status, "createdAt", "updatedAt", "lineItem", po, "poTotal", currency) FROM stdin;
+5cf85e7d-0345-4268-92f8-f87dfa1ebfe2	FS-DB-DT-bRDS	bRDS	DB account BRDS project under Prasad Ombhase	2026-01-01 00:00:00	\N	ACTIVE	2025-12-17 07:41:52.466	2026-01-06 16:15:58.121	1	PO72195993	51480.00	EUR
+60a34c68-2cbd-4b58-8de1-d2e5fa4ce045	FS-DB-DT-dbRef	dbRef	DB dbRef project	2026-01-01 00:00:00	\N	ACTIVE	2025-12-16 12:55:14.628	2026-01-06 16:16:09.292	1	PO72196348	183240.01	EUR
+a7496e11-335c-44b9-a29c-5ac05482cd27	FS-DB-OPUS	OPUS	OPUS 	2026-01-01 00:00:00	\N	ACTIVE	2025-12-16 06:17:34.127	2026-01-06 16:16:19.747	1	PO72195992	240020.00	EUR
+\.
+
+
+--
+-- TOC entry 4959 (class 0 OID 16689)
+-- Dependencies: 222
+-- Data for Name: ProjectResource; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."ProjectResource" (id, "projectId", "userId", rate, "assignedAt", "rateType", "assignedDays", "startDate", currency) FROM stdin;
+9aba0770-6844-4415-918d-7f91675ac975	a7496e11-335c-44b9-a29c-5ac05482cd27	663360e5-d1ba-442f-b844-443b277dfd6b	179.00	2026-01-05 07:03:26.821	DAILY	220	2026-01-01 00:00:00	EUR
+f6dda608-233b-405f-aa5c-4341945490ce	a7496e11-335c-44b9-a29c-5ac05482cd27	b5368a47-10d8-449f-8e3d-a01dd1dc69f6	228.00	2026-01-05 07:08:00.897	DAILY	220	2026-01-01 00:00:00	EUR
+15917510-0664-42d3-87c6-a28a21d1f50c	a7496e11-335c-44b9-a29c-5ac05482cd27	e1e12293-2bf8-41d1-8ac9-30094704ecd4	228.00	2026-01-05 07:08:18.18	DAILY	220	2026-01-01 00:00:00	EUR
+69599c3f-c6d2-4380-b055-812df6b50e06	a7496e11-335c-44b9-a29c-5ac05482cd27	5f18d59d-e474-4830-8bca-88c9c1345411	228.00	2026-01-05 07:08:35.777	DAILY	220	2026-01-01 00:00:00	EUR
+1b44ab29-0757-4b23-90f8-079cb1388c0a	a7496e11-335c-44b9-a29c-5ac05482cd27	644133ea-64f2-4d30-bed0-99c03e676063	228.00	2026-01-05 07:09:02.138	DAILY	220	2026-01-01 00:00:00	EUR
+a4b11798-712c-4093-be9b-2a1d2497e07b	60a34c68-2cbd-4b58-8de1-d2e5fa4ce045	fa1f86fb-c183-44b5-beea-ddde2be0f9be	306.00	2026-01-05 07:10:52.862	DAILY	220	2026-01-01 00:00:00	EUR
+0b8c9c4f-b0f0-4377-8b72-9a4e9d7cb6d4	60a34c68-2cbd-4b58-8de1-d2e5fa4ce045	824883c4-8428-4aad-b4f3-0cf01761a8f8	306.00	2026-01-05 07:11:08.877	DAILY	220	2026-01-01 00:00:00	EUR
+4cf1e8dd-e533-4242-9fb2-df8ff78e2bce	60a34c68-2cbd-4b58-8de1-d2e5fa4ce045	0d75f89b-a7f5-4837-9f42-4073c6aba018	306.00	2026-01-05 07:11:36.385	DAILY	90	2026-01-01 00:00:00	EUR
+594700e7-0f11-42db-afba-3456ada4b0c5	60a34c68-2cbd-4b58-8de1-d2e5fa4ce045	b91244cb-e4b7-44e3-afc6-b20ae1ccfcff	234.00	2026-01-05 07:11:54.278	DAILY	90	2026-01-01 00:00:00	EUR
+d9d874ec-d074-49f7-ace6-e9acabd9b555	5cf85e7d-0345-4268-92f8-f87dfa1ebfe2	ab3f87e7-ae34-405c-b294-e0c9ecc6ed21	234.00	2026-01-05 07:12:47.74	DAILY	220	2026-01-01 00:00:00	EUR
+\.
+
+
+--
+-- TOC entry 4960 (class 0 OID 16706)
+-- Dependencies: 223
+-- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."User" (id, email, password, name, role, "createdAt", "updatedAt", "empId", "joiningDate") FROM stdin;
+b91244cb-e4b7-44e3-afc6-b20ae1ccfcff	bhushanrajend.bhama@hcltech.com	$2b$10$GY/eGy5/fMNAwKWtPSpTi.E6Gbwttrm5wMFmHh/P5GRcfrrdPVudS	Bhushan Rajendra Bhamare	RESOURCE	2025-12-16 12:54:40.888	2025-12-17 07:30:45.617	52277284	2025-01-01 00:00:00
+0d75f89b-a7f5-4837-9f42-4073c6aba018	rajarajeswari.k@hcltech.com	$2b$10$Z3GRPh16qnm9IDeAz5wyS.LEa2n6ebSZ9UOsLkkztsV5ewUc6qvpi	Rajarajeswari K	RESOURCE	2025-12-17 07:31:31.138	2025-12-17 07:31:31.138	52048758	2025-01-01 00:00:00
+ab3f87e7-ae34-405c-b294-e0c9ecc6ed21	archana.gangane@hcltech.com	$2b$10$t.rckaX7Rejx4GaeQa9vWOVXF11Hccz945oFBte7T/MIDCjfRexbO	Archana Gangane	RESOURCE	2025-12-17 07:32:04.16	2025-12-17 07:32:04.16	52181941	2025-01-01 00:00:00
+b5368a47-10d8-449f-8e3d-a01dd1dc69f6	nidhi_sha@hcltech.com	$2b$10$92ryhOBD6pffITlBOCdtwexfaVdWDJ4vmYWxltVKPr7e/aLq.5h1C	Nidhi Sharma	RESOURCE	2025-12-17 07:33:20.885	2025-12-17 07:33:20.885	52041383	2025-01-01 00:00:00
+824883c4-8428-4aad-b4f3-0cf01761a8f8	kanu_priya@hcltech.com	$2b$10$DrN/o8TjTqgx9LEHztbyEeqezpz8YmV.cjt4HTcAfIj7wdWYTPyYe	Kanu Priya	RESOURCE	2025-12-17 07:33:56.672	2025-12-17 07:33:56.672	52168742	2025-01-01 00:00:00
+fa1f86fb-c183-44b5-beea-ddde2be0f9be	vasu.gu@hcltech.com	$2b$10$S3xv1Ds2PRmTkA8bz2CJYuFYOzFiBYcmw85Zs4YO9KD2hQVBc8Gcm	Vasu Gupta	RESOURCE	2025-12-17 07:34:28.529	2025-12-17 07:34:28.529	51742296	2025-01-01 00:00:00
+644133ea-64f2-4d30-bed0-99c03e676063	ramanathan.s@hcltech.com	$2b$10$hukGL/CYZd1yZxZjqDEar.q.tV1FvtGWBb0qeyGZwmCWEAi.nmy52	Ramanathan Shanmugam	RESOURCE	2025-12-17 07:35:04.822	2025-12-17 07:35:04.822	51718566	2025-01-01 00:00:00
+e1e12293-2bf8-41d1-8ac9-30094704ecd4	ranjitasanket.chalke@hcltech.com	$2b$10$1Sbde.aHtyM4QaUxls2WYuMdSmlP2EXivAU/hM9LAAThMESB3bU.i	Ranjita Sanket Chalke	RESOURCE	2025-12-17 07:35:42.13	2025-12-17 07:35:42.13	52286670	2025-01-01 00:00:00
+5d671014-7c6a-44e8-a984-53f3b170c832	admin@test.com	$2b$10$favYGmBk3wAxJ6j1yQeQU.gD2ryU.rQ..NiqJEiAfnynzvINuOm3m	Admin User	ADMIN	2025-12-15 09:12:57.878	2025-12-16 12:42:57.046	\N	\N
+663360e5-d1ba-442f-b844-443b277dfd6b	abuyousuf.farhad@hcltech.com	$2b$10$t0SmGh8neQIjo5WKxoRAy.ZBHMS27.6cNx3Mg6s.UGfe9vqUwjYA.	Abu Yousuf Farhad	RESOURCE	2025-12-17 07:32:46.674	2026-01-05 06:39:01.583	52157765	2025-01-01 00:00:00
+c6c8a9e4-09d7-4c05-90c0-522c896c89ae	viewer@test.com	$2b$10$nzSl7BsgcTDqL.V7DvIwXes5YrqKNYZK.Q26fQ3Mz8vYz7DUdt7Em	Viewer User	ADMIN_VIEWER	2026-01-07 12:06:15.522	2026-01-07 12:06:15.522	\N	\N
+5f18d59d-e474-4830-8bca-88c9c1345411	swapnilsa@hcltech.com	$2b$10$byWTHki4WOK7qhlBpkGISOnmGiVvlPMVyQ2/.zVoGSUHaJV6ILgM2	Swapnil Ashtikar	RESOURCE	2025-12-16 09:19:07.823	2026-01-07 12:13:45.309	51781451	2025-01-01 00:00:00
+37dd3fea-1f58-4dff-82e7-27bb52cca64f	vivek.behari@hcltech.com	$2b$10$7t5x1aiSfugl76/jInqcgOZa2gKHCTXsn/1k7yj7cMgRfnlbAj1wy	Vivek Behari	ADMIN_VIEWER	2026-01-07 12:22:13.748	2026-01-07 12:22:13.748		2026-01-07 00:00:00
+\.
+
+
+-- Completed on 2026-01-07 18:47:12
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict WPEVvyyDdibDb9IuVVwnhfmkjjbvkh9LoGQofJrJjStwgAqxdTa7NOWsna1N9QV
+
