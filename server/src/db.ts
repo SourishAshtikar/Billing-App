@@ -9,6 +9,18 @@ dotenv.config();
 const connectionString = process.env.DATABASE_URL || 'postgresql://user:pass@db:5432/db';
 
 const pool = new Pool({ connectionString });
+
+console.log('DB Config:', {
+  connectionString: connectionString?.replace(/:[^:@]*@/, ':****@'),
+});
+
+pool.connect().then(client => {
+  console.log('DB Pool Connected successfully');
+  client.release();
+}).catch(err => {
+  console.error('DB Pool Connection failed:', err);
+});
+
 const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({

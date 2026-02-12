@@ -8,6 +8,7 @@ import resourceRoutes from './routes/resourceRoutes';
 import leaveRoutes from './routes/leaveRoutes';
 import billingRoutes from './routes/billingRoutes';
 import userRoutes from './routes/userRoutes';
+import rtoRoutes from './routes/rtoRoutes';
 
 
 dotenv.config();
@@ -40,6 +41,7 @@ app.use('/api/resources', resourceRoutes);
 app.use('/api/leaves', leaveRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/rto', rtoRoutes);
 
 
 app.get('/api/health', (req: Request, res: Response) => {

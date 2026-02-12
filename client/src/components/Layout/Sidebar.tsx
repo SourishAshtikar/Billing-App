@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Calendar, CreditCard, Users, Settings, LogOut, Shield } from 'lucide-react';
+import { Home, Calendar, CreditCard, Users, Settings, LogOut, Shield, FileText } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
@@ -66,6 +66,9 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                         </NavLink>
                         <NavLink to="/users" style={linkStyle}>
                             <Shield size={20} /> User Management
+                        </NavLink>
+                        <NavLink to="/rto" style={linkStyle}>
+                            <FileText size={20} /> RTO Compliance
                         </NavLink>
                     </>
                 )}

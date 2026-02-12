@@ -10,6 +10,7 @@ import Resources from './pages/Resources';
 import Settings from './pages/Settings';
 import ResourceDashboard from './pages/ResourceDashboard';
 import UserManagement from './pages/UserManagement';
+import RtoCompliance from './pages/RtoCompliance';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -73,6 +74,11 @@ const AppRoutes = () => {
         <Route path="/users" element={
           <ProtectedRoute allowedRoles={['ADMIN', 'ADMIN_VIEWER']}>
             <UserManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="/rto" element={
+          <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
+            <RtoCompliance />
           </ProtectedRoute>
         } />
 

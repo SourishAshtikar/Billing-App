@@ -69,6 +69,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     try {
         console.log('Login attempt for email:', email);
+        require('fs').appendFileSync('error.log', new Date().toISOString() + ' Login Attempt: ' + email + '\n');
         const user = await prisma.user.findUnique({
             where: { email },
         });
@@ -101,6 +102,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         }
     } catch (error) {
         console.error(error);
+        require('fs').appendFileSync('error.log', new Date().toISOString() + ' Login Error: ' + JSON.stringify(error, Object.getOwnPropertyNames(error)) + '\n');
         res.status(500).json({ message: 'Server error' });
     }
 };

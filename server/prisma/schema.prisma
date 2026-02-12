@@ -89,3 +89,26 @@ enum Role {
   MANAGER
   RESOURCE
 }
+
+model RtoRecord {
+  id            String   @id @default(uuid())
+  empId         String
+  empName       String
+  workLocation  String?
+  projectCode   String?
+  projectName   String?
+  rmSapId       String?
+  rmName        String?
+  uploadedAt    DateTime @default(now())
+}
+
+model RtoAttendance {
+  id        String   @id @default(uuid())
+  empId     String
+  date      DateTime
+  status    String
+  duration  Float?
+  createdAt DateTime @default(now())
+  
+  @@unique([empId, date]) // Prevent duplicate attendance for same person on same day
+}

@@ -367,8 +367,8 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
         if (currentMonth >= 0) {
             for (let m = 0; m <= currentMonth; m++) {
                 const bizDays = getBusinessDaysInMonth(m, targetYear);
-                const monthLeaves = allYearLeaves.filter(l => new Date(l.date).getMonth() === m);
-                const leaveDays = monthLeaves.reduce((acc, l) => acc + (l.isHalfDay ? 0.5 : 1), 0);
+                const monthLeaves = allYearLeaves.filter((l: any) => new Date(l.date).getMonth() === m);
+                const leaveDays = monthLeaves.reduce((acc: number, l: any) => acc + (l.isHalfDay ? 0.5 : 1), 0);
 
                 // If it's the current month, we only count business days up to today
                 let businessDaysPassed = bizDays;
@@ -420,7 +420,7 @@ export const getResourceWorkingDays = async (req: Request, res: Response) => {
                 const day = d.getDay();
                 if (day !== 0 && day !== 6) {
                     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                    const leaveEntry = allYearLeaves.find(l => {
+                    const leaveEntry = allYearLeaves.find((l: any) => {
                         const ld = new Date(l.date);
                         const ldStr = `${ld.getFullYear()}-${String(ld.getMonth() + 1).padStart(2, '0')}-${String(ld.getDate()).padStart(2, '0')}`;
                         return ldStr === dateStr;
@@ -559,17 +559,17 @@ export const getAnnualMonthlyBreakdown = async (req: Request, res: Response) => 
         const now = new Date();
         now.setHours(23, 59, 59, 999); // Include today in YTD
 
-        const result = resources.map(resource => {
+        const result = resources.map((resource: any) => {
             const monthlyBreakdown: any = {};
             let bizDaysWorkedYTD = 0;
 
             for (let m = 0; m < 12; m++) {
                 const totalBusinessDays = getBusinessDaysInMonth(m, targetYear);
-                const monthLeaves = resource.leaves.filter(l => {
+                const monthLeaves = resource.leaves.filter((l: any) => {
                     const d = new Date(l.date);
                     return d.getMonth() === m && d.getFullYear() === targetYear;
                 });
-                const leaveDays = monthLeaves.reduce((acc, l) => acc + (l.isHalfDay ? 0.5 : 1), 0);
+                const leaveDays = monthLeaves.reduce((acc: number, l: any) => acc + (l.isHalfDay ? 0.5 : 1), 0);
 
                 monthlyBreakdown[m] = {
                     businessDays: totalBusinessDays,
@@ -598,7 +598,7 @@ export const getAnnualMonthlyBreakdown = async (req: Request, res: Response) => 
                         if (dayOfWeek === 0 || dayOfWeek === 6) continue;
 
                         const dateStr = `${targetYear}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                        const leaveEntry = resource.leaves.find(l => {
+                        const leaveEntry = resource.leaves.find((l: any) => {
                             const ld = new Date(l.date);
                             const ldStr = `${ld.getFullYear()}-${String(ld.getMonth() + 1).padStart(2, '0')}-${String(ld.getDate()).padStart(2, '0')}`;
                             return ldStr === dateStr;
