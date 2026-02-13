@@ -268,6 +268,10 @@ export const getRtoAnalytics = async (req: Request, res: Response) => {
                 name: record.empName,
                 location: record.workLocation,
                 project: record.projectName,
+                projectCode: record.projectCode,
+                projectName: record.projectName,
+                rmSapId: record.rmSapId,
+                rmName: record.rmName,
                 daysPresent: 0,
                 compliant: false,
                 weeklyCompliance: []

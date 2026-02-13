@@ -47,6 +47,10 @@ const RtoCompliance = () => {
             'Employee ID',
             'Employee Name',
             'Location',
+            'Project Code',
+            'Project Name',
+            'RM SAP ID',
+            'RM Name',
             'Total Days Present',
             'Week 1',
             'Week 2',
@@ -78,25 +82,29 @@ const RtoCompliance = () => {
                 { v: row.empId, t: 's' },
                 { v: row.name, t: 's' },
                 { v: row.location, t: 's' },
+                { v: row.projectCode || '-', t: 's' },
+                { v: row.projectName || '-', t: 's' },
+                { v: row.rmSapId || '-', t: 's' },
+                { v: row.rmName || '-', t: 's' },
                 { v: row.daysPresent, t: 'n', s: getCountStyle(row.daysPresent, 12) },
                 {
-                    v: week1 ? `${week1.present} days` : '-',
-                    t: 's',
+                    v: week1 ? week1.present : '-',
+                    t: week1 ? 'n' : 's',
                     s: week1 ? getStatusStyle(week1.compliant) : {}
                 },
                 {
-                    v: week2 ? `${week2.present} days` : '-',
-                    t: 's',
+                    v: week2 ? week2.present : '-',
+                    t: week2 ? 'n' : 's',
                     s: week2 ? getStatusStyle(week2.compliant) : {}
                 },
                 {
-                    v: week3 ? `${week3.present} days` : '-',
-                    t: 's',
+                    v: week3 ? week3.present : '-',
+                    t: week3 ? 'n' : 's',
                     s: week3 ? getStatusStyle(week3.compliant) : {}
                 },
                 {
-                    v: week4 ? `${week4.present} days` : '-',
-                    t: 's',
+                    v: week4 ? week4.present : '-',
+                    t: week4 ? 'n' : 's',
                     s: week4 ? getStatusStyle(week4.compliant) : {}
                 },
                 {
@@ -115,6 +123,10 @@ const RtoCompliance = () => {
             { wch: 15 }, // ID
             { wch: 25 }, // Name
             { wch: 15 }, // Location
+            { wch: 15 }, // Project Code
+            { wch: 25 }, // Project Name
+            { wch: 15 }, // RM SAP ID
+            { wch: 25 }, // RM Name
             { wch: 15 }, // Total
             { wch: 15 }, // W1
             { wch: 15 }, // W2
@@ -321,7 +333,7 @@ const RtoCompliance = () => {
                                                             opacity: 0.8
                                                         }} />
                                                         <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                                                            {week.present} days
+                                                            {week.present}
                                                         </span>
                                                     </div>
                                                 </td>

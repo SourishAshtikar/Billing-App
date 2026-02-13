@@ -5,7 +5,7 @@ import Button from '../components/UI/Button';
 import { billing as billingApi, projects as projectApi } from '../services/api.ts';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 
 const BillingReports: React.FC = () => {
     const [reports, setReports] = useState<any[]>([]);
